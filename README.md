@@ -28,7 +28,8 @@ Copy `discordeq.exe` to your eqemu directory where eqemu_config resides. Run it,
 * If option 4) shows `Status: Bad`, then you may choose to allow discordeq to copy a file into your quests directory.
  
 ###Start DiscordEQ
-* If all options are in good status, option 5) will appear and can be selected to start DiscordEQ. If all settings are good on startup, it will begin immediately without showing the above menu.
+* If all options are in good status, option 5) will appear and can be selected to start DiscordEQ.
+* If all settings are good on startup of `discordeq.exe`, it will skip the menu and start immediately.
  
 ###Enabling Players to talk from Discord to EQ
 * Admin-level accounts must grant players the ability to talk in game. 
