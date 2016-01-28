@@ -9,15 +9,17 @@ import (
 
 func main() {
 	for {
-		showMenu()
+		err := showMenu()
+		if err == nil { //Keep looping menu until no errors found
+			break
+		}
 	}
 }
 
-func showMenu() {
-	var err error
+func showMenu() (err error) {
 	var option string
 	var isConfigLoaded bool
-	fmt.Println("\n\n===DiscordEQ Plugin===")
+	fmt.Println("\n===DiscordEQ Plugin===")
 
 	config, err := eqemuconfig.LoadConfig()
 	status := "Good"
@@ -29,9 +31,12 @@ func showMenu() {
 		status = fmt.Sprintf("Good (%s)", config.Longame)
 	}
 	fmt.Printf("1) Reload eqemu_config.xml (Status: %s)\n", status)
-
 	if isConfigLoaded {
-		fmt.Println("More options")
+		status = "Good"
+		if config.Discord.Username == "" || config.Discord.Password == "" {
+			status = "Bad"
+		}
+		fmt.Printf("2) Discord settings inside eqemu_config.xml (Status: %s)\n", status)
 	}
 	fmt.Println("Q) Quit")
 
@@ -41,5 +46,9 @@ func showMenu() {
 	if option == "q" || option == "exit" || option == "quit" {
 		fmt.Println("Quitting")
 		os.Exit(0)
+	} else {
+		fmt.Println("Invalid option")
+		err = fmt.Errorf("No option chosen")
 	}
+	return
 }
