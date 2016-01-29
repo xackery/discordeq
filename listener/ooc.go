@@ -64,15 +64,14 @@ func checkForMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
 	//if lastID is set
 	if lastId != 0 {
 		//grab new ids if they match criteria
-		err = db.Select(&userMessages, "SELECT `from`, `to`, message, type, timerecorded FROM qs_player_speech WHERE id > ? AND `type` = 5 LIMIT 50", lastId)
+		err = db.Select(&userMessages, "SELECT `from`, `to`, message, type, timerecorded FROM qs_player_speech WHERE id > ? AND `type` = 5 AND `from` != '!discord' LIMIT 50", lastId)
 	}
 	if err != nil {
 		return
 	}
 
-	//Iterate any resluts
+	//Iterate any results
 	for _, msg := range userMessages {
-		log.Println(msg.From, msg.Message, msg.CreateDate, "vs", time.Now().UTC())
 		disco.SendMessage(channelID, fmt.Sprintf("**%s OOC**: %s", msg.From, msg.Message))
 	}
 
