@@ -33,7 +33,7 @@ func ListenToOOC(config *eqemuconfig.Config, disco *discord.Discord) {
 		db, err = connectDB(config)
 		if err != nil {
 			log.Println("[ooc] error while getting DB connection:", err.Error())
-			time.Sleep(10 * time.Second)
+			time.Sleep((config.Discord.RefreshRate + 10) * time.Second)
 			continue
 		}
 
@@ -41,11 +41,11 @@ func ListenToOOC(config *eqemuconfig.Config, disco *discord.Discord) {
 		if err != nil {
 			log.Println("[ooc] error while checking for messages:", err.Error())
 			db.Close()
-			time.Sleep(10 * time.Second)
+			time.Sleep((config.Discord.RefreshRate + 10) * time.Second)
 			continue
 		}
 		db.Close()
-		time.Sleep(1 * time.Second)
+		time.Sleep(config.Discord.RefreshRate * time.Second)
 	}
 }
 

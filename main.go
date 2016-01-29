@@ -29,6 +29,9 @@ func startService() {
 		fmt.Println("Error while loading config to start:", err.Error())
 		os.Exit(1)
 	}
+	if config.Discord.RefreshRate == 0 {
+		config.Discord.RefreshRate = 60
+	}
 	disco := discord.Discord{}
 	err = disco.Connect(config.Discord.Username, config.Discord.Password)
 	go listener.ListenToDiscord(&config, &disco)
