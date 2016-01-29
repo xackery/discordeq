@@ -27,7 +27,6 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 	session.StateEnabled = true
 
 	session.OnMessageCreate = func(s *discordgo.Session, m *discordgo.Message) {
-		log.Println(m.ChannelID, config.Discord.ChannelID)
 		if m.ChannelID != config.Discord.ChannelID {
 			return
 		}
