@@ -36,10 +36,10 @@ func ShowMenu() (err error) {
 		fmt.Printf("2) Configure Discord settings inside eqemu_config.xml (Status: %s)\n", status)
 
 		status = "Good"
-		err := checkChatLog()
-		if err != nil {
+
+		if !isChatLoggingEnabled(&config) {
 			isEverythingGood = false
-			status = "Bad: " + err.Error()
+			status = "Bad"
 		}
 		fmt.Printf("3) Enable Chat Logging (Status: %s)\n", status)
 		fmt.Printf("4) Quest File For Discord Chat (Status: %s)\n", status)
@@ -60,23 +60,18 @@ func ShowMenu() (err error) {
 		for err != nil {
 			err = menuDiscord(&config)
 		}
+		err = fmt.Errorf("Configuring discord")
+
 	} else if option == "3" {
 		err = fmt.Errorf("Configuring SQL")
 		for err != nil {
-			menuChatLog(&config)
+			err = menuChatLog(&config)
 		}
+		err = fmt.Errorf("Configuring SQL")
 
 	} else {
 		fmt.Println("Invalid option")
 		err = fmt.Errorf("No option chosen")
 	}
-	return
-}
-
-func checkChatLog() (err error) {
-	return
-}
-
-func menuChatLogging(config *eqemuconfig.Config) (err error) {
 	return
 }
