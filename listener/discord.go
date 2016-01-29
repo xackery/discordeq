@@ -7,6 +7,10 @@ import (
 	"log"
 	"strings"
 	//"time"
+	_ "database/sql"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
@@ -64,8 +68,29 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 		if ign == "" {
 			return
 		}
-		log.Println(ign, m.Content)
+		msg := m.Content
+		//Maximum limit of 4k
+		if len(msg) > 4000 {
+			msg = msg[0:4000]
+		}
 
+		if len(msg) < 1 {
+			return
+		}
+
+		//Insert entry
+		db, err := sqlx.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", config.Database.Username, config.Database.Password, config.Database.Host, config.Database.Port, config.Database.Db))
+		if err != nil {
+			return
+		}
+		_, err = db.NamedExec("INSERT INTO qs_player_speech (`from`, `to`, `message`,`type`) VALUES (:ign, '!discord', :msg, 5)",
+			map[string]interface{}{
+				"ign": ign,
+				"msg": msg,
+			})
+		if err != nil {
+			log.Println("Invalid insert:", err.Error())
+		}
 	}
 
 	select {}
