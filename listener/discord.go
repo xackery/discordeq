@@ -21,10 +21,8 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 
 	session = disco.GetSession()
 	guild, err = session.Guild(config.Discord.ServerID)
-	log.Println(guild.Name)
-	log.Println(guild.Members)
 	if err != nil {
-		log.Println("Error getting srver", config.Discord.ServerID, "with error:", err.Error())
+		log.Println("[discord] Error getting srver", config.Discord.ServerID, "with error:", err.Error())
 		return
 	}
 	//var err error
@@ -38,13 +36,13 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 		ign := ""
 		member, err := session.State.Member(config.Discord.ServerID, m.Author.ID)
 		if err != nil {
-			log.Println("Error getting member:", err.Error())
+			log.Println("[discord] Error getting member:", err.Error())
 			return
 		}
 
 		roles, err := session.GuildRoles(config.Discord.ServerID)
 		if err != nil {
-			log.Println("Error getting roles:", err.Error())
+			log.Println("[discord] Error getting roles:", err.Error())
 			return
 		}
 		for _, role := range member.Roles {
@@ -89,8 +87,10 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 				"msg": msg,
 			})
 		if err != nil {
-			log.Println("Invalid insert:", err.Error())
+			log.Println("[discord] Invalid insert:", err.Error())
+			return
 		}
+		log.Printf("[discord] %s: %s\n", ign, msg)
 	}
 
 	select {}
