@@ -24,32 +24,44 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 		return
 	}
 	//var err error
-	for {
+	session.StateEnabled = true
 
-		session.OnMessageCreate = func(s *discordgo.Session, m *discordgo.Message) {
-			log.Println(m.ChannelID, config.Discord.ChannelID)
-			if m.ChannelID != config.Discord.ChannelID {
-				return
-			}
+	session.OnMessageCreate = func(s *discordgo.Session, m *discordgo.Message) {
+		log.Println(m.ChannelID, config.Discord.ChannelID)
+		if m.ChannelID != config.Discord.ChannelID {
+			return
+		}
 
-			ign := ""
-			for _, member := range guild.Members {
-				log.Println(member.User.Username)
-				for _, role := range member.Roles {
-					log.Println(role)
-					if strings.Contains(strings.ToLower(role), "IGN:") {
-						split := strings.SplitAfter(role, "IGN:")
-						log.Println(split)
+		ign := ""
+		member, err := session.State.Member(config.Discord.ServerID, m.Author.ID)
+		if err != nil {
+			log.Println("Error getting member:", err.Error())
+			return
+		}
+
+		roles, err := session.GuildRoles(config.Discord.ServerID)
+		if err != nil {
+			log.Println("Error getting roles:", err.Error())
+			return
+		}
+		for _, role := range member.Roles {
+			for _, gRole := range roles {
+				if strings.TrimSpace(gRole.ID) == strings.TrimSpace(role) {
+					if strings.Contains(gRole.Name, "IGN:") {
+						splitStr := strings.Split(gRole.Name, "IGN:")
+						if len(splitStr) > 1 {
+							ign = strings.TrimSpace(splitStr[1])
+						}
 					}
 				}
 			}
-			if ign == "" {
-				return
-			}
-			log.Println(ign, m.Content)
-
 		}
+		if ign == "" {
+			return
+		}
+		log.Println(ign, m.Content)
 
-		select {}
 	}
+
+	select {}
 }
