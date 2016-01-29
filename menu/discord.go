@@ -11,7 +11,7 @@ import (
 func menuDiscord(config *eqemuconfig.Config) (err error) {
 	disco := discord.Discord{}
 	disco.Connect(config.Discord.Username, config.Discord.Password)
-
+	fmt.Println("You are logged in as:", disco.GetName())
 	guilds, err := disco.GetGuilds()
 	if err != nil {
 		fmt.Println("There is an error with your discord settings:", err.Error())

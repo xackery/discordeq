@@ -29,7 +29,7 @@ func ShowMenu() (err error) {
 			status = "Not configured"
 			isEverythingGood = false
 		}
-		if config.Discord.ServerID == 0 && config.Discord.ChannelID == 0 {
+		if config.Discord.ServerID == "" && config.Discord.ChannelID == "" {
 			status = "Bad"
 			isEverythingGood = false
 		}

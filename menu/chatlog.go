@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var theCommand = "REPLACE INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`) VALUES (0, 'QueryServ:PlayerLogChat', 'true')"
+var theCommand = "REPLACE INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`) VALUES (1, 'QueryServ:PlayerLogChat', 'true')"
 
 func menuChatLog(config *eqemuconfig.Config) (err error) {
 	fmt.Println("To enable chat logging, I will execute this command:")
@@ -44,7 +44,7 @@ func isChatLoggingEnabled(config *eqemuconfig.Config) bool {
 	//QueryServ, PlayerLogChat
 	//REPLACE INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (0, 'QueryServ:PlayerLogChat', 'false', '');
 	count := 0
-	err = db.Get(&count, "SELECT count(ruleset_id) FROM rule_values WHERE rule_name = 'QueryServ:PlayerLogChat' AND rule_value = 'true' && ruleset_id = 0 LIMIT 1")
+	err = db.Get(&count, "SELECT count(ruleset_id) FROM rule_values WHERE rule_name = 'QueryServ:PlayerLogChat' AND rule_value = 'true' && ruleset_id = 1 LIMIT 1")
 	if err != nil {
 		fmt.Println("Error initial", err.Error())
 		return false

@@ -18,6 +18,23 @@ func (d *Discord) Connect(username string, password string) (err error) {
 	return
 }
 
+func (d *Discord) GetName() (name string) {
+	if d.instance == nil {
+		err := d.Connect(d.lastUsername, d.lastPassword)
+		if err != nil {
+			name = "Unknown"
+			return
+		}
+	}
+
+	user, err := d.instance.User("@me")
+	if err != nil {
+		name = "Unknown"
+		return
+	}
+	return user.Username
+}
+
 func (d *Discord) GetGuilds() (guilds []*discordgo.Guild, err error) {
 	if d.instance == nil {
 		err = d.Connect(d.lastUsername, d.lastPassword)
@@ -45,5 +62,16 @@ func (d *Discord) GetChannels(guildID string) (channels []*discordgo.Channel, er
 	if err != nil {
 		return
 	}
+	return
+}
+
+func (d *Discord) SendMessage(channelID string, message string) (msgReturn *discordgo.Message, err error) {
+	if d.instance == nil {
+		err = d.Connect(d.lastUsername, d.lastPassword)
+		if err != nil {
+			return
+		}
+	}
+	msgReturn, err = d.instance.ChannelMessageSend(channelID, message)
 	return
 }
