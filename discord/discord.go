@@ -50,6 +50,12 @@ func (d *Discord) GetGuilds() (guilds []*discordgo.Guild, err error) {
 	return
 }
 
+func (d *Discord) GetSession() (session *discordgo.Session) {
+	session = d.instance
+
+	return
+}
+
 func (d *Discord) GetChannels(guildID string) (channels []*discordgo.Channel, err error) {
 	if d.instance == nil {
 		err = d.Connect(d.lastUsername, d.lastPassword)
