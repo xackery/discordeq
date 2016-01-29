@@ -44,7 +44,13 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 			return
 		}
 		for _, role := range member.Roles {
+			if ign != "" {
+				break
+			}
 			for _, gRole := range roles {
+				if ign != "" {
+					break
+				}
 				if strings.TrimSpace(gRole.ID) == strings.TrimSpace(role) {
 					if strings.Contains(gRole.Name, "IGN:") {
 						splitStr := strings.Split(gRole.Name, "IGN:")
