@@ -6,9 +6,9 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 * Inside Discord, create a channel called #ooc (or whatever you prefer)
 * Right click the channel's name, and Copy Link. When you paste it, you'll get a url that looks similar to ``
 * You want to note the serverid and channelid #'s and put them into your eqemu_config.xml following up.
-*
-###eqemu_config initial setup
-Add to eqemu_config.xml these lines:
+
+###Set up eqemu_config.xml
+* Add to eqemu_config.xml these lines:
 ```xml
 <!-- Discord Configuration -->
 	<discord>
@@ -19,6 +19,7 @@ Add to eqemu_config.xml these lines:
 		<refreshrate>5</refreshrate>
 	</discord>
 ```
+* Note: Take a peek at the first line of your eqemu_config.xml, read the `<?xml version="1.0"?>` line, note that if the ?> ending is missing, namely the ?, my exe will not parse your config.
 
 ###Enable Player Chat Logging
 * Chat Logging allows all player-chat events to be stored in the DB. If you do not have this enabled, run this in a MySQL client:
