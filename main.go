@@ -34,8 +34,11 @@ func startService() {
 	}
 	disco := discord.Discord{}
 	err = disco.Connect(config.Discord.Username, config.Discord.Password)
+	if err != nil {
+		fmt.Println("Error connecting to discord:", err.Error())
+		os.Exit(1)
+	}
 	go listener.ListenToDiscord(&config, &disco)
 	go listener.ListenToOOC(&config, &disco)
-	fmt.Println("Listening")
 	select {}
 }

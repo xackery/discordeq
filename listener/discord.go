@@ -25,6 +25,8 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 		log.Println("[discord] Error getting srver", config.Discord.ServerID, "with error:", err.Error())
 		return
 	}
+
+	log.Println("[discord] Listening to", guild.Name)
 	//var err error
 	session.StateEnabled = true
 
@@ -81,7 +83,7 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 		if err != nil {
 			return
 		}
-		_, err = db.NamedExec("INSERT INTO qs_player_speech (`from`, `to`, `message`,`type`) VALUES (:ign, '!discord', :msg, 5)",
+		_, err = db.NamedExec("INSERT INTO qs_player_speech (`from`, `to`, `message`,`type`, `guilddbid`, `minstatus`) VALUES (:ign, '!discord', :msg, 5, 0, 0)",
 			map[string]interface{}{
 				"ign": ign,
 				"msg": msg,

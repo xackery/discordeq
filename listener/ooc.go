@@ -29,6 +29,7 @@ var userMessages []UserMessage
 func ListenToOOC(config *eqemuconfig.Config, disco *discord.Discord) {
 	var err error
 	channelID = config.Discord.ChannelID
+	log.Println("[ooc] Listening to OOC")
 	for {
 		db, err = connectDB(config)
 		if err != nil {
@@ -64,7 +65,7 @@ func checkForMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
 	//if lastID is set
 	if lastId != 0 {
 		//grab new ids if they match criteria
-		err = db.Select(&userMessages, "SELECT `from`, `to`, message, type, timerecorded FROM qs_player_speech WHERE id > ? AND `type` = 5 AND `from` != '!discord' LIMIT 50", lastId)
+		err = db.Select(&userMessages, "SELECT `from`, `to`, message, type, timerecorded FROM qs_player_speech WHERE id > ? AND `type` = 5 AND `to` != '!discord' LIMIT 50", lastId)
 	}
 	if err != nil {
 		return
