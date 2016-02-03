@@ -21,7 +21,7 @@ sub EVENT_TIMER {
     $query_handle = $connect->prepare($query);
     $query_handle->execute($lastId);
     while (@row = $query_handle->fetchrow_array()){
-        quest::we(2, $row[0]." says from discord, '".$row[1]."'");
+        quest::we(260, $row[0]." says from discord, '".$row[1]."'");
         $lastId = $row[2];
     }
     return
