@@ -16,7 +16,7 @@ sub EVENT_SPAWN {
 }
 
 sub EVENT_TIMER {
-      $connect = plugin::LoadMysql();
+    $connect = plugin::LoadMysql();
     $query = "SELECT `from`, `message`, `id` FROM qs_player_speech WHERE `id` > ? AND `type` = 5 AND `to` = '!discord' LIMIT 1";
     $query_handle = $connect->prepare($query);
     $query_handle->execute($lastId);
@@ -24,5 +24,6 @@ sub EVENT_TIMER {
         quest::we(260, $row[0]." says from discord, '".$row[1]."'");
         $lastId = $row[2];
     }
+    $connect->disconnect;
     return
 }*/
