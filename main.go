@@ -24,7 +24,7 @@ func main() {
 
 func startService() {
 	//Load config
-	config, err := eqemuconfig.LoadConfig()
+	config, err := eqemuconfig.GetConfig()
 	if err != nil {
 		fmt.Println("Error while loading config to start:", err.Error())
 		os.Exit(1)
@@ -38,7 +38,7 @@ func startService() {
 		fmt.Println("Error connecting to discord:", err.Error())
 		os.Exit(1)
 	}
-	go listener.ListenToDiscord(&config, &disco)
-	go listener.ListenToOOC(&config, &disco)
+	go listener.ListenToDiscord(config, &disco)
+	go listener.ListenToOOC(config, &disco)
 	select {}
 }
