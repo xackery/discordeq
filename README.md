@@ -23,7 +23,7 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 
 ###Enable Player Chat Logging
 * Chat Logging allows all player-chat events to be stored in the DB. If you do not have this enabled, run this in a MySQL client:
-* ```sql REPLACE ```
+* ```sql UPDATE rule_values SET rule_value = 'true' WHERE rule_name ='QueryServ:PlayerLogChat' AND ruleset_id = 1; ```
 * In game, /say #reloadrules
 * If you go into your DB client and query the data inside the `qs_player_speech` table after reloadrules, entries should pop up, like OOC events.
 
