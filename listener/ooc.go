@@ -73,7 +73,12 @@ func checkForMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
 
 	//Iterate any results
 	for _, msg := range userMessages {
-		disco.SendMessage(channelID, fmt.Sprintf("**%s OOC**: %s", msg.From, msg.Message))
+		_, err := disco.SendMessage(channelID, fmt.Sprintf("**%s OOC**: %s", msg.From, msg.Message))
+		if err != nil {
+			log.Printf("[ooc] Error sending message (%s: %s) %s", msg.From, msg.Message, err.Error())
+		} else {
+			log.Printf("[ooc] %s: %s\n", msg.From, msg.Message)
+		}
 	}
 
 	if len(userMessages) > 0 { //if results match, grab the last element's Id as our lastID
