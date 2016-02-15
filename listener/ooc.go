@@ -8,6 +8,7 @@ import (
 	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/eqemuconfig"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -25,8 +26,10 @@ type UserMessage struct {
 }
 
 var userMessages []UserMessage
+var config *eqemuconfig.Config
 
-func ListenToOOC(config *eqemuconfig.Config, disco *discord.Discord) {
+func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
+	config = eqconfig
 	var err error
 	channelID = config.Discord.ChannelID
 	log.Println("[ooc] Listening to OOC")
@@ -61,6 +64,23 @@ func connectDB(config *eqemuconfig.Config) (db *sqlx.DB, err error) {
 }
 
 func checkForMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
+	err = checkForOOCMessages(db, disco)
+	if err != nil {
+		return
+	}
+	checkForChannelMessages(db, disco)
+	if err != nil {
+		return
+	}
+	//We've parsed the entire file.
+	err = db.Get(&lastId, "SELECT id from qs_player_speech ORDER BY id DESC limit 1")
+	if err != nil {
+		return
+	}
+	return
+}
+
+func checkForOOCMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
 	userMessages = nil
 	//if lastID is set
 	if lastId != 0 {
@@ -86,10 +106,43 @@ func checkForMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
 		return
 	}
 
-	//We've parsed the entire file.
-	err = db.Get(&lastId, "SELECT id from qs_player_speech ORDER BY id DESC limit 1")
+	return
+}
+
+func checkForChannelMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
+	userMessages = nil
+	//if lastID is set
+	if lastId != 0 {
+		//grab new ids if they match criteria
+		err = db.Select(&userMessages, "SELECT `from`, `to`, message, type, timerecorded FROM qs_player_speech WHERE id > ? AND `type` = 6 AND `from` = '!eq2discord' LIMIT 50", lastId)
+	}
 	if err != nil {
 		return
+	}
+
+	sendChannelID := ""
+	//Iterate any results
+	for _, msg := range userMessages {
+		fmt.Println("Processing message:", msg.Message)
+		for _, channel := range config.Discord.Channels {
+			if strings.ToLower(msg.To) == strings.ToLower(channel.ChannelName) {
+				sendChannelID = channel.ChannelID
+				break
+			}
+		}
+
+		if sendChannelID == "" {
+			//Don't send the messgae if it's invalid
+			log.Printf("[ooc] Error finding channel %s for id %d\n", msg.To, msg.Id)
+			continue
+		}
+		fmt.Println("Sending message from sendChannelID: %s", sendChannelID)
+		_, err := disco.SendMessage(sendChannelID, msg.Message)
+		if err != nil {
+			log.Printf("[ooc] Error sending message (%s: %s) %s\n", msg.From, msg.Message, err.Error())
+		} else {
+			log.Printf("[ooc] %s: %s\n", msg.From, msg.Message)
+		}
 	}
 
 	return
