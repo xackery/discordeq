@@ -83,6 +83,7 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) {
 		if err != nil {
 			return
 		}
+		defer db.Close()
 		_, err = db.NamedExec("INSERT INTO qs_player_speech (`from`, `to`, `message`,`type`, `guilddbid`, `minstatus`) VALUES (:ign, '!discord', :msg, 5, 0, 0)",
 			map[string]interface{}{
 				"ign": ign,
