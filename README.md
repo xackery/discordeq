@@ -8,7 +8,8 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 * Inside User Settings Pop up, go to the Appearance tab on left.
 * Inside the Appearance section, Check on the Developer Mode option
 * Hit done to exit the user settings pop up.
-* Right click the channel's name, and Copy Link. When you paste it, you'll get a url that looks similar to ``
+* Right click the channel's name, and Copy Link. When you paste it, you'll get a number that represents channelid usedbelow.
+* Right click the server's name, and copy link. When you paste it, you'll get a number that represents serverid used below.
 * You want to note the serverid and channelid #'s and put them into your eqemu_config.xml following up.
 
 ###Set up eqemu_config.xml
@@ -18,8 +19,8 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 	<discord>
 		<username>YourDiscordUsername</username>
 		<password>YourDiscordPassword</password>
-		<serverid>ServerIDFromDiscordEQ</serverid>
-		<channelid>ChannelIDFromDiscordEQ</channelid>
+		<serverid>ServerIDFromDiscord</serverid>
+		<channelid>ChannelIDFromDiscord</channelid>
 		<refreshrate>5</refreshrate>
 	</discord>
 ```
