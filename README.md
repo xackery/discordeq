@@ -4,6 +4,10 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 ##How to install
 ###Make an OOC channel
 * Inside Discord, create a channel called #ooc (or whatever you prefer)
+* Click the sprocket (User Settings) on the bottom left area.
+* Inside User Settings Pop up, go to the Appearance tab on left.
+* Inside the Appearance section, Check on the Developer Mode option
+* Hit done to exit the user settings pop up.
 * Right click the channel's name, and Copy Link. When you paste it, you'll get a url that looks similar to ``
 * You want to note the serverid and channelid #'s and put them into your eqemu_config.xml following up.
 
