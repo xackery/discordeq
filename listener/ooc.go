@@ -55,6 +55,7 @@ func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
 		t.Close()
 		time.Sleep(time.Duration(config.Discord.RefreshRate) * time.Second)
 	}
+	log.Println("Connected.")
 }
 
 func connectTelnet(config *eqemuconfig.Config) (err error) {

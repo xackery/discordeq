@@ -26,6 +26,7 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err er
 	}
 	session.StateEnabled = true
 	session.AddHandler(messageCreate)
+	log.Println("Connected.")
 	select {}
 }
 
