@@ -29,22 +29,20 @@ var userMessages []UserMessage
 var config *eqemuconfig.Config
 
 func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
-	config = eqconfig
 	var err error
+	config = eqconfig
 	channelID = config.Discord.ChannelID
-	log.Println("[ooc] Listening to OOC")
 	for {
 		db, err = connectDB(config)
 		if err != nil {
-			log.Println("[ooc] error while getting DB connection:", err.Error())
+			log.Println("[OOC] Warning while getting DB connection:", err.Error())
 			time.Sleep((time.Duration(config.Discord.RefreshRate) + 10) * time.Second)
-
 			continue
 		}
 
 		err = checkForMessages(db, disco)
 		if err != nil {
-			log.Println("[ooc] error while checking for messages:", err.Error())
+			log.Println("[OOC] Warning while checking for messages:", err.Error())
 			db.Close()
 			time.Sleep((time.Duration(config.Discord.RefreshRate) + 10) * time.Second)
 			continue
@@ -133,15 +131,15 @@ func checkForChannelMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
 
 		if sendChannelID == "" {
 			//Don't send the messgae if it's invalid
-			log.Printf("[ooc] Error finding channel %s for id %d\n", msg.To, msg.Id)
+			log.Printf("[OOC] Error finding channel %s for id %d\n", msg.To, msg.Id)
 			continue
 		}
 		fmt.Println("Sending message from sendChannelID: %s", sendChannelID)
 		_, err := disco.SendMessage(sendChannelID, msg.Message)
 		if err != nil {
-			log.Printf("[ooc] Error sending message (%s: %s) %s\n", msg.From, msg.Message, err.Error())
+			log.Printf("[OOC] Error sending message (%s: %s) %s\n", msg.From, msg.Message, err.Error())
 		} else {
-			log.Printf("[ooc] %s: %s\n", msg.From, msg.Message)
+			log.Printf("[OOC] %s: %s\n", msg.From, msg.Message)
 		}
 	}
 
