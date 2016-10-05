@@ -7,6 +7,7 @@ import (
 	"github.com/xackery/eqemuconfig"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -15,44 +16,50 @@ func main() {
 }
 
 func startService() {
-	log.Println("Starting DiscordEQ v0.4")
+	log.Println("Starting DiscordEQ v0.5")
 	var option string
 	//Load config
 	config, err := eqemuconfig.GetConfig()
 	if err != nil {
 		log.Println("Error while loading eqemu_config.xml to start:", err.Error())
-		log.Println("Press any key to exit.")
+		fmt.Println("Press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 	if config.Discord.RefreshRate == 0 {
 		config.Discord.RefreshRate = 10
 	}
+	if strings.ToLower(config.World.Tcp.Telnet) != "enabled" {
+		log.Println("Telnet must be enabled for this tool to work. Check your eqemuconfig.xml, and please adjust.")
+		fmt.Println("Press a key then enter to exit.")
+		fmt.Scan(&option)
+		os.Exit(1)
+	}
 
 	if config.Discord.Username == "" {
 		log.Println("I don't see a username set in your <discord><username> section of eqemuconfig.xml, please adjust.")
-		log.Println("Press any key to exit.")
+		fmt.Println("Press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.Password == "" {
 		log.Println("I don't see a password set in your <discord><password> section of eqemuconfig.xml, please adjust.")
-		log.Println("Press any key to exit.")
+		fmt.Println("Press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.ServerID == "" {
 		log.Println("I don't see a serverid set in your <discord><serverid> section of eqemuconfig.xml, please adjust.")
-		log.Println("Press any key to exit.")
+		fmt.Println("Press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.ChannelID == "" {
 		log.Println("I don't see a channelid set in your <discord><channelid> section of eqemuconfig.xml, please adjust.")
-		log.Println("Press any key to exit.")
+		fmt.Println("Press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
@@ -60,7 +67,7 @@ func startService() {
 	err = disco.Connect(config.Discord.Username, config.Discord.Password)
 	if err != nil {
 		log.Println("Error connecting to discord:", err.Error())
-		log.Println("Press any key to exit.")
+		fmt.Println("Press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}

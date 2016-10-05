@@ -7,10 +7,7 @@ import (
 	"log"
 	"strings"
 	//"time"
-	_ "database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 )
 
 func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err error) {
@@ -80,21 +77,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	//Insert entry
-	db, err := sqlx.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", config.Database.Username, config.Database.Password, config.Database.Host, config.Database.Port, config.Database.Db))
-	if err != nil {
+	//Send message.
+	if err = Sendln(fmt.Sprintf("%s says from discord, '%s'", ign, msg)); err != nil {
+		log.Printf("[Discord] Error sending message to telnet (%s:%s): %s\n", ign, msg, err.Error())
 		return
 	}
-	defer db.Close()
-	_, err = db.NamedExec("INSERT INTO qs_player_speech (`from`, `to`, `message`,`type`, `guilddbid`, `minstatus`) VALUES (:ign, '!discord', :msg, 5, 0, 0)",
-		map[string]interface{}{
-			"ign": ign,
-			"msg": msg,
-		})
-	if err != nil {
-		log.Println("[Discord] Invalid insert:", err.Error())
-		return
-	}
-	log.Printf("[Discord] %s: %s\n", ign, msg)
 
+	log.Printf("[Discord] %s: %s\n", ign, msg)
 }

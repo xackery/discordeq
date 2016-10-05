@@ -1,19 +1,16 @@
 package listener
 
 import (
-	_ "database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/eqemuconfig"
+	"github.com/ziutek/telnet"
 	"log"
 	"strings"
 	"time"
 )
 
 var lastId int
-var db *sqlx.DB
 var channelID string
 
 type UserMessage struct {
@@ -28,120 +25,108 @@ type UserMessage struct {
 var userMessages []UserMessage
 var config *eqemuconfig.Config
 
+var t *telnet.Conn
+
+func GetTelnet() (conn *telnet.Conn) {
+	conn = t
+	return
+}
+
 func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
 	var err error
 	config = eqconfig
 	channelID = config.Discord.ChannelID
+	var t *telnet.Conn
 	for {
-		db, err = connectDB(config)
+		err = connectTelnet(config)
 		if err != nil {
-			log.Println("[OOC] Warning while getting DB connection:", err.Error())
+			log.Println("[OOC] Warning while getting telnet connection:", err.Error())
 			time.Sleep((time.Duration(config.Discord.RefreshRate) + 10) * time.Second)
 			continue
 		}
 
-		err = checkForMessages(db, disco)
+		err = checkForMessages(t, disco)
 		if err != nil {
 			log.Println("[OOC] Warning while checking for messages:", err.Error())
-			db.Close()
+			t.Close()
 			time.Sleep((time.Duration(config.Discord.RefreshRate) + 10) * time.Second)
 			continue
 		}
-		db.Close()
+		t.Close()
 		time.Sleep(time.Duration(config.Discord.RefreshRate) * time.Second)
 	}
 }
 
-func connectDB(config *eqemuconfig.Config) (db *sqlx.DB, err error) {
-	//Connect to DB
-	db, err = sqlx.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true", config.Database.Username, config.Database.Password, config.Database.Host, config.Database.Port, config.Database.Db))
-	if err != nil {
+func connectTelnet(config *eqemuconfig.Config) (err error) {
+	if t, err = telnet.Dial("tcp", fmt.Sprintf("%s:%s", config.World.Tcp.Ip, config.World.Tcp.Port)); err != nil {
 		return
 	}
+	t.SetReadDeadline(time.Now().Add(10 * time.Second))
+	t.SetWriteDeadline(time.Now().Add(10 * time.Second))
+	if err = t.SkipUntil("Username:"); err != nil {
+		return
+	}
+	if err = Sendln(config.Discord.TelnetUsername); err != nil {
+		return
+	}
+
+	if err = t.SkipUntil("Password:"); err != nil {
+		return
+	}
+	if err = Sendln(config.Discord.TelnetPassword); err != nil {
+		return
+	}
+
+	if err = Sendln("echo off"); err != nil {
+		return
+	}
+
+	if err = Sendln("acceptmessages on"); err != nil {
+		return
+	}
+
+	t.SetReadDeadline(time.Time{})
 	return
 }
 
-func checkForMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
-	err = checkForOOCMessages(db, disco)
-	if err != nil {
-		return
-	}
-	checkForChannelMessages(db, disco)
-	if err != nil {
-		return
-	}
-	//We've parsed the entire file.
-	err = db.Get(&lastId, "SELECT id from qs_player_speech ORDER BY id DESC limit 1")
-	if err != nil {
-		return
-	}
+func Sendln(s string) (err error) {
+	buf := make([]byte, len(s)+1)
+	copy(buf, s)
+	buf[len(s)] = '\n'
+	_, err = t.Write(buf)
 	return
 }
 
-func checkForOOCMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
-	userMessages = nil
-	//if lastID is set
-	if lastId != 0 {
-		//grab new ids if they match criteria
-		err = db.Select(&userMessages, "SELECT `from`, `to`, message, type, timerecorded FROM qs_player_speech WHERE id > ? AND `type` = 5 AND `to` != '!discord' LIMIT 50", lastId)
-	}
-	if err != nil {
-		return
-	}
-
-	//Iterate any results
-	for _, msg := range userMessages {
-		_, err := disco.SendMessage(channelID, fmt.Sprintf("**%s OOC**: %s", msg.From, msg.Message))
-		if err != nil {
-			log.Printf("[ooc] Error sending message (%s: %s) %s", msg.From, msg.Message, err.Error())
-		} else {
-			log.Printf("[ooc] %s: %s\n", msg.From, msg.Message)
+func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
+	data := []byte{}
+	message := ""
+	for {
+		if data, err = t.ReadUntil("\n"); err != nil {
+			err = fmt.Errorf("Error reading", err.Error())
+			return
 		}
-	}
-
-	if len(userMessages) > 0 { //if results match, grab the last element's Id as our lastID
-		lastId = userMessages[len(userMessages)-1].Id
-		return
-	}
-
-	return
-}
-
-func checkForChannelMessages(db *sqlx.DB, disco *discord.Discord) (err error) {
-	userMessages = nil
-	//if lastID is set
-	if lastId != 0 {
-		//grab new ids if they match criteria
-		err = db.Select(&userMessages, "SELECT `from`, `to`, message, type, timerecorded FROM qs_player_speech WHERE id > ? AND `type` = 6 AND `from` = '!eq2discord' LIMIT 50", lastId)
-	}
-	if err != nil {
-		return
-	}
-
-	sendChannelID := ""
-	//Iterate any results
-	for _, msg := range userMessages {
-		fmt.Println("Processing message:", msg.Message)
-		for _, channel := range config.Discord.Channels {
-			if strings.ToLower(msg.To) == strings.ToLower(channel.ChannelName) {
-				sendChannelID = channel.ChannelID
-				break
-			}
-		}
-
-		if sendChannelID == "" {
-			//Don't send the messgae if it's invalid
-			log.Printf("[OOC] Error finding channel %s for id %d\n", msg.To, msg.Id)
+		message = string(data)
+		if len(message) < 3 { //ignore small messages
 			continue
 		}
-		fmt.Println("Sending message from sendChannelID: %s", sendChannelID)
-		_, err := disco.SendMessage(sendChannelID, msg.Message)
-		if err != nil {
-			log.Printf("[OOC] Error sending message (%s: %s) %s\n", msg.From, msg.Message, err.Error())
-		} else {
-			log.Printf("[OOC] %s: %s\n", msg.From, msg.Message)
+		if !strings.Contains(message, "says ooc,") { //ignore non-ooc
+			continue
 		}
-	}
+		if strings.Index(message, ">") < 1 { //ignore prompts
+			continue
+		}
+		if message[0:1] == "*" { //ignore echo backs
+			continue
+		}
 
-	return
+		message = message[strings.Index(message, ">")+2 : len(message)-1]
+		sender := message[0:strings.Index(message, " says ooc,")]
+		message = message[strings.Index(message, "says ooc, '")+11 : len(message)-2]
+
+		if _, err = disco.SendMessage(channelID, fmt.Sprintf("**%s OOC**: %s", sender, message)); err != nil {
+			log.Printf("[OOC] Error sending message (%s: %s) %s", sender, message, err.Error())
+			continue
+		}
+		log.Printf("[OOC] %s: %s\n", sender, message)
+	}
 }
