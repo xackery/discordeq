@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/xackery/discordeq/applog"
 	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/discordeq/listener"
 	"github.com/xackery/eqemuconfig"
@@ -12,6 +13,8 @@ import (
 )
 
 func main() {
+	applog.StartupInteractive()
+	log.SetOutput(applog.DefaultOutput)
 	startService()
 }
 
@@ -21,8 +24,9 @@ func startService() {
 	//Load config
 	config, err := eqemuconfig.GetConfig()
 	if err != nil {
-		log.Println("Error while loading eqemu_config.xml to start:", err.Error())
+		applog.Error.Println("Error while loading eqemu_config.xml to start:", err.Error())
 		fmt.Println("Press a key then enter to exit.")
+
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
@@ -37,37 +41,37 @@ func startService() {
 	}
 
 	if config.Discord.Username == "" {
-		log.Println("I don't see a username set in your <discord><username> section of eqemuconfig.xml, please adjust.")
-		fmt.Println("Press a key then enter to exit.")
+		applog.Error.Println("I don't see a username set in your <discord><username> section of eqemu_config.xml, please adjust.")
+		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.Password == "" {
-		log.Println("I don't see a password set in your <discord><password> section of eqemuconfig.xml, please adjust.")
-		fmt.Println("Press a key then enter to exit.")
+		applog.Error.Println("I don't see a password set in your <discord><password> section of eqemu_config.xml, please adjust.")
+		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.ServerID == "" {
-		log.Println("I don't see a serverid set in your <discord><serverid> section of eqemuconfig.xml, please adjust.")
-		fmt.Println("Press a key then enter to exit.")
+		applog.Error.Println("I don't see a serverid set in your <discord><serverid> section of eqemuconfig.xml, please adjust.")
+		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.ChannelID == "" {
-		log.Println("I don't see a channelid set in your <discord><channelid> section of eqemuconfig.xml, please adjust.")
-		fmt.Println("Press a key then enter to exit.")
+		applog.Error.Println("I don't see a channelid set in your <discord><channelid> section of eqemuconfig.xml, please adjust.")
+		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 	disco := discord.Discord{}
 	err = disco.Connect(config.Discord.Username, config.Discord.Password)
 	if err != nil {
-		log.Println("Error connecting to discord:", err.Error())
-		fmt.Println("Press a key then enter to exit.")
+		applog.Error.Println("Error connecting to discord:", err.Error())
+		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
@@ -78,26 +82,26 @@ func startService() {
 
 func listenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err error) {
 	for {
-		log.Println("[Discord] Connecting as", config.Discord.Username, "...")
+		applog.Info.Println("[Discord] Connecting as", config.Discord.Username, "...")
 		err = listener.ListenToDiscord(config, disco)
 		if err != nil {
-			log.Println("[Discord] Disconnected with error:", err.Error())
+			applog.Error.Println("[Discord] Disconnected with error:", err.Error())
 		}
 
-		log.Println("[Discord] Reconnecting in 5 seconds...")
+		applog.Info.Println("[Discord] Reconnecting in 5 seconds...")
 		time.Sleep(5 * time.Second)
 		err = disco.Connect(config.Discord.Username, config.Discord.Password)
 		if err != nil {
-			log.Println("[Discord] Error connecting to discord:", err.Error())
+			applog.Error.Println("[Discord] Error connecting to discord:", err.Error())
 		}
 	}
 }
 
 func listenToOOC(config *eqemuconfig.Config, disco *discord.Discord) (err error) {
 	for {
-		log.Println("[OOC] Connecting to ", config.Database.Host, "...")
+		applog.Info.Println("[OOC] Connecting to ", config.Database.Host, "...")
 		listener.ListenToOOC(config, disco)
-		log.Println("[OOC] Reconnecting in 5 seconds...")
+		applog.Info.Println("[OOC] Reconnecting in 5 seconds...")
 		time.Sleep(5 * time.Second)
 	}
 }
