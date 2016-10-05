@@ -11,8 +11,7 @@ type Discord struct {
 }
 
 func (d *Discord) Connect(username string, password string) (err error) {
-	d.instance, err = discordgo.New(username, password)
-	if err != nil {
+	if d.instance, err = discordgo.New(username, password); err != nil {
 		return
 	}
 	return
@@ -50,9 +49,13 @@ func (d *Discord) GetGuilds() (guilds []*discordgo.Guild, err error) {
 	return
 }
 
-func (d *Discord) GetSession() (session *discordgo.Session) {
+func (d *Discord) GetSession() (session *discordgo.Session, err error) {
+	if d.instance == nil {
+		if err = d.Connect(d.lastUsername, d.lastPassword); err != nil {
+			return
+		}
+	}
 	session = d.instance
-
 	return
 }
 

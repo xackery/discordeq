@@ -36,26 +36,17 @@ func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
 	var err error
 	config = eqconfig
 	channelID = config.Discord.ChannelID
-	var t *telnet.Conn
-	for {
-		err = connectTelnet(config)
-		if err != nil {
-			log.Println("[OOC] Warning while getting telnet connection:", err.Error())
-			time.Sleep((time.Duration(config.Discord.RefreshRate) + 10) * time.Second)
-			continue
-		}
 
-		err = checkForMessages(t, disco)
-		if err != nil {
-			log.Println("[OOC] Warning while checking for messages:", err.Error())
-			t.Close()
-			time.Sleep((time.Duration(config.Discord.RefreshRate) + 10) * time.Second)
-			continue
-		}
-		t.Close()
-		time.Sleep(time.Duration(config.Discord.RefreshRate) * time.Second)
+	if err = connectTelnet(config); err != nil {
+		log.Println("[OOC] Warning while getting telnet connection:", err.Error())
+		return
 	}
-	log.Println("Connected.")
+
+	if err = checkForMessages(t, disco); err != nil {
+		log.Println("[OOC] Warning while checking for messages:", err.Error())
+	}
+	t.Close()
+	return
 }
 
 func connectTelnet(config *eqemuconfig.Config) (err error) {
@@ -87,6 +78,7 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	}
 
 	t.SetReadDeadline(time.Time{})
+	t.SetWriteDeadline(time.Time{})
 	return
 }
 
@@ -107,22 +99,23 @@ func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
 			return
 		}
 		message = string(data)
+		//log.Printf("[DEBUG OOC] %s", message)
 		if len(message) < 3 { //ignore small messages
 			continue
 		}
 		if !strings.Contains(message, "says ooc,") { //ignore non-ooc
 			continue
 		}
-		if strings.Index(message, ">") < 1 { //ignore prompts
-			continue
+		if strings.Index(message, ">") > 0 { //ignore prompts
+			message = message[strings.Index(message, ">")+1:]
 		}
 		if message[0:1] == "*" { //ignore echo backs
 			continue
 		}
 
-		message = message[strings.Index(message, ">")+2 : len(message)-1]
 		sender := message[0:strings.Index(message, " says ooc,")]
-		message = message[strings.Index(message, "says ooc, '")+11 : len(message)-2]
+		message = message[strings.Index(message, "says ooc, '")+11 : len(message)-3]
+		sender = strings.Replace(sender, "_", " ", -1)
 
 		if _, err = disco.SendMessage(channelID, fmt.Sprintf("**%s OOC**: %s", sender, message)); err != nil {
 			log.Printf("[OOC] Error sending message (%s: %s) %s", sender, message, err.Error())
