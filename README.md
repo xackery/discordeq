@@ -3,6 +3,9 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 
 ##How to install
 
+### Note for previous versions
+* If you were running a previous version of DiscordEQ, you can now remove the quest file that I had you create, it is no longer needed!
+
 ###Set up eqemu_config.xml
 * Add to eqemu_config.xml these lines:
 ```xml
