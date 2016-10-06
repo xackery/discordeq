@@ -98,7 +98,7 @@ func listenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err er
 
 func listenToOOC(config *eqemuconfig.Config, disco *discord.Discord) (err error) {
 	for {
-		applog.Info.Println("[OOC] Connecting to ", config.Database.Host, "...")
+		applog.Info.Println("[OOC] Connecting to ", config.World.Tcp.Ip, "...")
 		listener.ListenToOOC(config, disco)
 		applog.Info.Println("[OOC] Reconnecting in 5 seconds...")
 		time.Sleep(5 * time.Second)
