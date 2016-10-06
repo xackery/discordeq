@@ -6,6 +6,7 @@ import (
 	"github.com/xackery/eqemuconfig"
 	"github.com/ziutek/telnet"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -106,7 +107,7 @@ func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
 		if !strings.Contains(message, "says ooc,") { //ignore non-ooc
 			continue
 		}
-		if strings.Index(message, ">") > 0 { //ignore prompts
+		if strings.Index(message, ">") > 0 && strings.Index(message, ">") < strings.Index(message, " ") { //ignore prompts
 			message = message[strings.Index(message, ">")+1:]
 		}
 		if message[0:1] == "*" { //ignore echo backs
@@ -117,10 +118,36 @@ func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
 		message = message[strings.Index(message, "says ooc, '")+11 : len(message)-3]
 		sender = strings.Replace(sender, "_", " ", -1)
 
+		message = convertLinks(config.Discord.ItemUrl, message)
+
 		if _, err = disco.SendMessage(channelID, fmt.Sprintf("**%s OOC**: %s", sender, message)); err != nil {
 			log.Printf("[OOC] Error sending message (%s: %s) %s", sender, message, err.Error())
 			continue
 		}
 		log.Printf("[OOC] %s: %s\n", sender, message)
 	}
+}
+
+func convertLinks(prefix string, message string) (messageFixed string) {
+	messageFixed = message
+	if strings.Count(message, "") > 1 {
+		sets := strings.SplitN(message, "", 3)
+
+		itemid, err := strconv.ParseInt(sets[1][0:6], 16, 32)
+		if err != nil {
+			itemid = 0
+		}
+		itemname := sets[1][56:]
+		itemlink := prefix
+		if itemid > 0 && len(prefix) > 0 {
+			itemlink = fmt.Sprintf(" %s%d (%s)", itemlink, itemid, itemname)
+		} else {
+			itemlink = fmt.Sprintf("*%s*", itemname)
+		}
+		messageFixed = sets[0] + itemlink + sets[2]
+		if strings.Count(message, "") > 1 {
+			messageFixed = convertLinks(prefix, messageFixed)
+		}
+	}
+	return
 }

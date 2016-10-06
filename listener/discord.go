@@ -6,8 +6,12 @@ import (
 	"github.com/xackery/eqemuconfig"
 	"log"
 	"strings"
+	"unicode"
 	//"time"
 	"fmt"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
+	"unicode/utf8"
 )
 
 func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err error) {
@@ -78,7 +82,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if ign == "" {
 		return
 	}
-	msg := m.Content
+	msg := m.ContentWithMentionsReplaced()
 	//Maximum limit of 4k
 	if len(msg) > 4000 {
 		msg = msg[0:4000]
@@ -88,6 +92,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	ign = sanitize(ign)
+	msg = sanitize(msg)
+
 	//Send message.
 	if err = Sendln(fmt.Sprintf("emote world 260 %s says from discord, '%s'", ign, msg)); err != nil {
 		log.Printf("[Discord] Error sending message to telnet (%s:%s): %s\n", ign, msg, err.Error())
@@ -95,4 +102,27 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	log.Printf("[Discord] %s: %s\n", ign, msg)
+}
+
+func isMn(r rune) bool {
+	return unicode.Is(unicode.Mn, r) // Mn: nonspacing marks
+}
+
+func sanitize(data string) (sData string) {
+	t := transform.Chain(norm.NFD, transform.RemoveFunc(isMn), norm.NFC)
+	sData, _, _ = transform.String(t, data)
+	if !utf8.ValidString(sData) {
+		v := make([]rune, 0, len(sData))
+		for i, r := range sData {
+			if r == utf8.RuneError {
+				_, size := utf8.DecodeRuneInString(sData[i:])
+				if size == 1 {
+					continue
+				}
+			}
+			v = append(v, r)
+		}
+		sData = string(v)
+	}
+	return
 }
