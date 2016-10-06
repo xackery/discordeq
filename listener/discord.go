@@ -1,16 +1,16 @@
 package listener
 
 import (
+	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/eqemuconfig"
-	"log"
-	"strings"
-	"unicode"
-	//"time"
-	"fmt"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
+	"log"
+	"regexp"
+	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -109,8 +109,10 @@ func isMn(r rune) bool {
 }
 
 func sanitize(data string) (sData string) {
+	re := regexp.MustCompile("/^[\x00-\x7F]+")
 	t := transform.Chain(norm.NFD, transform.RemoveFunc(isMn), norm.NFC)
 	sData, _, _ = transform.String(t, data)
+	sData = strings.Replace(sData, "�", "", -1) //emotes
 	if !utf8.ValidString(sData) {
 		v := make([]rune, 0, len(sData))
 		for i, r := range sData {
@@ -124,5 +126,8 @@ func sanitize(data string) (sData string) {
 		}
 		sData = string(v)
 	}
+
+	//finally, regex strip
+	sData = re.ReplaceAllString(sData, "")
 	return
 }

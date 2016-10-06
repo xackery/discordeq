@@ -2,15 +2,6 @@
 This plugin allows Everquest to communicate with Discord in a bidirectional manner.
 
 ##How to install
-###Make an OOC channel
-* Inside Discord, create a channel called #ooc (or whatever you prefer)
-* Click the sprocket (User Settings) on the bottom left area.
-* Inside User Settings Pop up, go to the Appearance tab on left.
-* Inside the Appearance section, Check on the Developer Mode option
-* Hit done to exit the user settings pop up.
-* Right click the channel's name, and Copy Link. When you paste it, you'll get a number that represents channelid usedbelow.
-* Right click the server's name, and copy link. When you paste it, you'll get a number that represents serverid used below.
-* You want to note the serverid and channelid #'s and put them into your eqemu_config.xml following up.
 
 ###Set up eqemu_config.xml
 * Add to eqemu_config.xml these lines:
@@ -19,72 +10,39 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 	<discord>
 		<username>YourDiscordUsername</username>
 		<password>YourDiscordPassword</password>
+        <telnetusername>YourTelnetAccountLSNAme</telnetusername>
+        <telnetpassword>YourTelnetPassword</telnetpassword>        
 		<serverid>ServerIDFromDiscord</serverid>
 		<channelid>ChannelIDFromDiscord</channelid>
 		<refreshrate>5</refreshrate>
+        <itemurl>http://yourallaclone.com/alla/?a=item&amp;id=</itemurl>
 	</discord>
 ```
-* Note: Take a peek at the first line of your eqemu_config.xml, read the `<?xml version="1.0"?>` line, note that if the ?> ending is missing, namely the ?, my exe will not parse your config.
 
-###Enable Player Chat Logging
-* Chat Logging allows all player-chat events to be stored in the DB. If you do not have this enabled, run this in a MySQL client:
-* ```sql UPDATE rule_values SET rule_value = 'true' WHERE rule_name ='QueryServ:PlayerLogChat' AND ruleset_id = 1; ```
-* In game, /say #reloadrules
-* If you go into your DB client and query the data inside the `qs_player_speech` table after reloadrules, entries should pop up, like OOC events.
+###Set ServerID and ChannelID
+* Click the sprocket on the bottom left area to go into user settings.
+* Inside User Settings Pop up, go to the Appearance tab on left.
+* Inside the Appearance tab, Enable on the Developer Mode option
+* Hit done to exit the user settings pop up.
+* Inside Discord, create a channel called #ooc (or another name, whichever you prefer)
+* Right click the channel's name, and choose the copy link option. When you paste it, you'll get a number that represents a channelid noted above.
+* Right click the server's name, and copy link. When you paste it, you'll get a number that represents serverid noted above.
 
+###Set ItemURL
+* this is optional, if you leave the itemurl field blank (or remove it), it will default to showing item links in italics in chat, e.g. *Arrow* when someone itemlinks an Arrow.
 
-###Copy Quest
-* You **must** have a static zone and an npc that is unkillable for the next step, but essentially, copy this quest to an NPC to allow discord conversations to be enabled in game:
-```perl 
-my $lastId = 0;
+###Enable Telnet
+* Look through eqemu_config and you will find an option for telnet="enabled".
 
-sub EVENT_SPAWN {
-    #Get last ID
-    $connect = plugin::LoadMysql();
-    $query = "SELECT `id` FROM qs_player_speech ORDER BY `id` DESC LIMIT 1";
-    $query_handle = $connect->prepare($query);
-    $query_handle->execute();
-    while (@row = $query_handle->fetchrow_array()){
-        $lastId = $row[0];
-    }
-      quest::settimer("discord", 1);
-}
+###Set a telnet account password
+* Go to your Accounts table on the DB, and set a password for one of your GM accounts. You can manually enter a password in there, plain text, and copy/paste it into the <telnetpassword> field in your eqemu_config.xml.
 
-sub EVENT_TIMER {
-      $connect = plugin::LoadMysql();
-    $query = "SELECT `from`, `message`, `id` FROM qs_player_speech WHERE `id` > ? AND `type` = 5 AND `to` = '!discord' LIMIT 1";
-    $query_handle = $connect->prepare($query);
-    $query_handle->execute($lastId);
-    while (@row = $query_handle->fetchrow_array()){
-        quest::we(260, $row[0]." says from discord, '".$row[1]."'");
-        $lastId = $row[2];
-    }
-    return
-}
-```
-* You will need to #reloadqst and #repop a zone for it to activate.
-
-###Run EXE.
-* Run discordeq.exe from the same directory that eqemu_config.xml exists. On success, it will show [ooc] Listening and [discord] Listening.
- 
+###Run Discord.
+* Run discordeq from the same directory that eqemu_config.xml exists. If any settings are incorrect, you will be prompted on what is incorrect and how to fix it.
 
 ###Enabling Players to talk from Discord to EQ
-* Admin-level accounts must grant players the ability to talk in game. 
+* Admin-level accounts can only do the following steps.
 * To allow this, inside discord go to Server Settings.
 * Go to Roles.
-* Create a new role, with the name: `IGN: <username>`. IGN: prefix is required for DiscordEQ to detect a player. For example, to identify the discord user `Xackery` as `Shin`, add a role named `IGN: Shin` and assign it to the user `Xackery`
+* Create a new role, with the name: `IGN: <username>`. The `IGN:` prefix is required for DiscordEQ to detect a player and is used to identify the player in game, For example, to identify the discord user `Xackery` as `Shin`, I would create a role named `IGN: Shin`, right click the user Xackery, and assign the role to them.
 * If the above user chats inside the assigned channel, their message will appear in game as `Shin says from discord, 'Their Message Here'`
-
-## Troubleshooting
-
-### eqemu_config: Error decoding config: XML syntax error on line 131: unexpected EOF
-* The first line of your eqemu_config.xml should look like this: `<?xml version="1.0"?>`, note the ?> on ending, if there's no ? on ending it will fail to parse.
- 
-### Tracing where the problem is
-There's 3 parts to make this work:
-* 1 is discordeq.exe, it handles all discord chat, read/writing to DB
-* 2 is the DB, it uses the qs_player_speech table to provide info for the other two steps
-* 3 is the quest script, it handles parsing DB entries that discord puts in (they have a to field of !discord) and broadcasts it in game.
-* Trail the steps 1 to 2 to 3 or 3 to 2 to 1 based on which one is faulty.
-
-

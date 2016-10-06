@@ -142,7 +142,7 @@ func convertLinks(prefix string, message string) (messageFixed string) {
 		if itemid > 0 && len(prefix) > 0 {
 			itemlink = fmt.Sprintf(" %s%d (%s)", itemlink, itemid, itemname)
 		} else {
-			itemlink = fmt.Sprintf("*%s*", itemname)
+			itemlink = fmt.Sprintf(" *%s* ", itemname)
 		}
 		messageFixed = sets[0] + itemlink + sets[2]
 		if strings.Count(message, "") > 1 {
