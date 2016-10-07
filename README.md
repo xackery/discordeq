@@ -49,3 +49,6 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 * Go to Roles.
 * Create a new role, with the name: `IGN: <username>`. The `IGN:` prefix is required for DiscordEQ to detect a player and is used to identify the player in game, For example, to identify the discord user `Xackery` as `Shin`, I would create a role named `IGN: Shin`, right click the user Xackery, and assign the role to them.
 * If the above user chats inside the assigned channel, their message will appear in game as `Shin says from discord, 'Their Message Here'`
+
+### (Optional) Extend Telnet Timeout
+* By default, telnet's timeout is 10 minutes. You can update it's timeout to a longer duration by setting the rule Console:SessionTimeOut to a higher value.
