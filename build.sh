@@ -1,4 +1,4 @@
-export VERSION="0.4"
+export VERSION="0.41"
 export NAME="discordeq"
 echo Building Linux
 GOOS=linux GOARCH=amd64 go build main.go

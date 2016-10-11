@@ -5,13 +5,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/eqemuconfig"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 	"log"
 	"regexp"
 	"strings"
-	"unicode"
-	"unicode/utf8"
 )
 
 func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err error) {
@@ -36,6 +32,7 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err er
 
 	session.StateEnabled = true
 	session.AddHandler(messageCreate)
+	log.Printf("[Discord] Connected\n")
 	if err = session.Open(); err != nil {
 		log.Printf("[Discord] Session closed: %s", err.Error())
 		return
@@ -104,30 +101,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	log.Printf("[Discord] %s: %s\n", ign, msg)
 }
 
-func isMn(r rune) bool {
-	return unicode.Is(unicode.Mn, r) // Mn: nonspacing marks
-}
-
 func sanitize(data string) (sData string) {
-	re := regexp.MustCompile("/^[\x00-\x7F]+")
-	t := transform.Chain(norm.NFD, transform.RemoveFunc(isMn), norm.NFC)
-	sData, _, _ = transform.String(t, data)
-	sData = strings.Replace(sData, "�", "", -1) //emotes
-	if !utf8.ValidString(sData) {
-		v := make([]rune, 0, len(sData))
-		for i, r := range sData {
-			if r == utf8.RuneError {
-				_, size := utf8.DecodeRuneInString(sData[i:])
-				if size == 1 {
-					continue
-				}
-			}
-			v = append(v, r)
-		}
-		sData = string(v)
-	}
-
-	//finally, regex strip
+	sData = data
+	sData = strings.Replace(sData, `%`, "&PCT;", -1)
+	re := regexp.MustCompile("[^\x00-\x7F]+")
 	sData = re.ReplaceAllString(sData, "")
 	return
 }

@@ -80,6 +80,7 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 
 	t.SetReadDeadline(time.Time{})
 	t.SetWriteDeadline(time.Time{})
+	log.Printf("[OOC] Connected\n")
 	return
 }
 
