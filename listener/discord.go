@@ -10,9 +10,12 @@ import (
 	"strings"
 )
 
-func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err error) {
+var disco *discord.Discord
+
+func ListenToDiscord(config *eqemuconfig.Config, disc *discord.Discord) (err error) {
 	var session *discordgo.Session
 	var guild *discordgo.Guild
+	disco = disc
 	//log.Println("Listen to discord..")
 	if session, err = disco.GetSession(); err != nil {
 		log.Printf("[Discord] Failed to get instance %s: %s (Make sure bot is part of server)", config.Discord.ServerID, err.Error())
@@ -31,7 +34,7 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err er
 	}
 
 	session.StateEnabled = true
-	session.AddHandler(messageCreate)
+	session.AddHandler(onMessageEvent)
 	log.Printf("[Discord] Connected\n")
 	if err = session.Open(); err != nil {
 		log.Printf("[Discord] Session closed: %s", err.Error())
@@ -41,10 +44,61 @@ func ListenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err er
 	return
 }
 
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.ChannelID != config.Discord.ChannelID {
+func onMessageEvent(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	//Look for messages to be relayed to OOC in game.
+	if m.ChannelID == config.Discord.ChannelID &&
+		len(m.Message.Content) > 0 &&
+		m.Message.Content[0:1] != "!" {
+		messageCreate(s, m)
 		return
 	}
+
+	//Look for any commands.
+	if len(m.Message.Content) > 0 &&
+		m.Message.Content[0:1] == "!" {
+		commandParse(s, m)
+	}
+
+}
+
+func commandParse(s *discordgo.Session, m *discordgo.MessageCreate) {
+	//Verify user is allowed to send commands
+	isAllowed := false
+	for _, admin := range config.Discord.Admins {
+		if m.Author.ID == admin.Id {
+			isAllowed = true
+			break
+		}
+	}
+	if !isAllowed {
+		if _, err := disco.SendMessage(m.ChannelID, fmt.Sprintf("Sorry %s, access denied.", m.Author.Username)); err != nil {
+			fmt.Printf("[Discord] Failed to send discord message: %s\n", err.Error())
+			return
+		}
+		return
+	}
+	//figure out command, remove the ! bang
+	command := strings.ToLower(m.Message.Content[1:])
+
+	switch command {
+	case "help":
+		if _, err := disco.SendMessage(m.ChannelID, fmt.Sprintf("%s: !help: Available commands:", m.Author.Username)); err != nil {
+			fmt.Printf("[Discord] Failed to send discord help command: %s\n", err.Error())
+			return
+		}
+	case "who":
+
+	default:
+		if _, err := disco.SendMessage(m.ChannelID, fmt.Sprintf("%s: Invalid command. Use !help to learn commands.", m.Author.Username)); err != nil {
+			fmt.Printf("[Discord] Failed to send discord command message: %s\n", err.Error())
+			return
+		}
+	}
+
+}
+
+func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	ign := ""
 	member, err := s.State.Member(config.Discord.ServerID, m.Author.ID)
