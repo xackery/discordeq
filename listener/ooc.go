@@ -51,6 +51,9 @@ func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
 }
 
 func connectTelnet(config *eqemuconfig.Config) (err error) {
+	if t != nil {
+		return
+	}
 	if t, err = telnet.Dial("tcp", fmt.Sprintf("%s:%s", config.World.Tcp.Ip, config.World.Tcp.Port)); err != nil {
 		return
 	}
@@ -94,9 +97,19 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 }
 
 func Sendln(s string) (err error) {
+
 	buf := make([]byte, len(s)+1)
 	copy(buf, s)
 	buf[len(s)] = '\n'
+	if t == nil {
+		for {
+			if err = connectTelnet(config); err != nil {
+				return
+			}
+			fmt.Println("Telnet not connected, reconnecting...")
+			time.Sleep(config.Discord.RefreshRate)
+		}
+	}
 	_, err = t.Write(buf)
 	return
 }
