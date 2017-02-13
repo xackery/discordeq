@@ -56,18 +56,27 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	}
 	t.SetReadDeadline(time.Now().Add(10 * time.Second))
 	t.SetWriteDeadline(time.Now().Add(10 * time.Second))
-	if err = t.SkipUntil("Username:"); err != nil {
-		return
-	}
-	if err = Sendln(config.Discord.TelnetUsername); err != nil {
+	index := 0
+	skipAuth := false
+	if index, err = t.SkipUntilIndex("Username:", "Connecting established from local host, auto assuming admin"); err != nil {
+		if index != 0 {
+			skipAuth = true
+			log.Println("[OOC] Skipping auth")
+		}
 		return
 	}
 
-	if err = t.SkipUntil("Password:"); err != nil {
-		return
-	}
-	if err = Sendln(config.Discord.TelnetPassword); err != nil {
-		return
+	if !skipAuth {
+		if err = Sendln(config.Discord.TelnetUsername); err != nil {
+			return
+		}
+
+		if err = t.SkipUntil("Password:"); err != nil {
+			return
+		}
+		if err = Sendln(config.Discord.TelnetPassword); err != nil {
+			return
+		}
 	}
 
 	if err = Sendln("echo off"); err != nil {
