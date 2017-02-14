@@ -66,7 +66,6 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 			skipAuth = true
 			log.Println("[OOC] Skipping auth")
 		}
-		return
 	}
 
 	if !skipAuth {
