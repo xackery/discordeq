@@ -34,7 +34,7 @@ func (d *Discord) GetName() (name string) {
 	return user.Username
 }
 
-func (d *Discord) GetGuilds() (guilds []*discordgo.Guild, err error) {
+func (d *Discord) GetGuilds() (guilds []*discordgo.UserGuild, err error) {
 	if d.instance == nil {
 		err = d.Connect(d.lastUsername, d.lastPassword)
 		if err != nil {

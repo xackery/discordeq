@@ -27,8 +27,7 @@ func ListenToDiscord(config *eqemuconfig.Config, disc *discord.Discord) (err err
 		return
 	}
 
-	isNotAvail := true
-	if guild.Unavailable == &isNotAvail {
+	if guild.Unavailable {
 		log.Printf("[Discord] Failed to get server %s: Server unavailable (Make sure bot is part of server, and has permission)", config.Discord.ServerID, err.Error())
 		return
 	}
