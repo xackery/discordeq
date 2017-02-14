@@ -54,6 +54,9 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	if t != nil {
 		return
 	}
+
+	log.Printf("[OOC] Connecting to %s:%s...\n", config.World.Tcp.Ip, config.World.Tcp.Port)
+
 	if t, err = telnet.Dial("tcp", fmt.Sprintf("%s:%s", config.World.Tcp.Ip, config.World.Tcp.Port)); err != nil {
 		return
 	}
