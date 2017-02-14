@@ -62,10 +62,11 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	index := 0
 	skipAuth := false
 	if index, err = t.SkipUntilIndex("Username:", "Connecting established from local host, auto assuming admin"); err != nil {
-		if index != 0 {
-			skipAuth = true
-			log.Println("[OOC] Skipping auth")
-		}
+		return
+	}
+	if index != 0 {
+		skipAuth = true
+		log.Println("[OOC] Skipping auth")
 	}
 
 	if !skipAuth {
