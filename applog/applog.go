@@ -1,11 +1,12 @@
 package applog
 
 import (
-	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 //------------------------------------------------------------------------------

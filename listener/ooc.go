@@ -2,13 +2,14 @@ package listener
 
 import (
 	"fmt"
-	"github.com/xackery/discordeq/discord"
-	"github.com/xackery/eqemuconfig"
-	"github.com/ziutek/telnet"
 	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/xackery/discordeq/discord"
+	"github.com/xackery/eqemuconfig"
+	"github.com/ziutek/telnet"
 )
 
 var lastId int
@@ -122,7 +123,7 @@ func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
 	message := ""
 	for {
 		if data, err = t.ReadUntil("\n"); err != nil {
-			err = fmt.Errorf("Error reading", err.Error())
+			err = fmt.Errorf("Error reading: %s", err.Error())
 			return
 		}
 		message = string(data)

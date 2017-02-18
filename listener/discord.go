@@ -2,12 +2,13 @@ package listener
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/xackery/discordeq/discord"
-	"github.com/xackery/eqemuconfig"
 	"log"
 	"regexp"
 	"strings"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/xackery/discordeq/discord"
+	"github.com/xackery/eqemuconfig"
 )
 
 var disco *discord.Discord
@@ -28,7 +29,7 @@ func ListenToDiscord(config *eqemuconfig.Config, disc *discord.Discord) (err err
 	}
 
 	if guild.Unavailable {
-		log.Printf("[Discord] Failed to get server %s: Server unavailable (Make sure bot is part of server, and has permission)", config.Discord.ServerID, err.Error())
+		log.Printf("[Discord] Failed to get server %s: Server unavailable (Make sure bot is part of server, and has permission)", config.Discord.ServerID)
 		return
 	}
 
@@ -40,7 +41,6 @@ func ListenToDiscord(config *eqemuconfig.Config, disc *discord.Discord) (err err
 		return
 	}
 	select {}
-	return
 }
 
 func onMessageEvent(s *discordgo.Session, m *discordgo.MessageCreate) {

@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/xackery/discordeq/applog"
-	"github.com/xackery/discordeq/discord"
-	"github.com/xackery/discordeq/listener"
-	"github.com/xackery/eqemuconfig"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/xackery/discordeq/applog"
+	"github.com/xackery/discordeq/discord"
+	"github.com/xackery/discordeq/listener"
+	"github.com/xackery/eqemuconfig"
 )
 
 func main() {
