@@ -3,10 +3,28 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "k2u2IaGuSzFbX8xrW/czXErzQmo=",
+			"path": "github.com/bwmarrin/discordgo",
+			"revision": "5835676872d7fa65ee37b32672079c4ede2c1855",
+			"revisionTime": "2016-12-10T14:47:14Z"
+		},
+		{
 			"checksumSHA1": "0LPpWq6cGvZii9pVp+eQwxONgDc=",
 			"path": "github.com/xackery/eqemuconfig",
 			"revision": "a0390ad674f0f7cfa464652350c895481def4b7a",
 			"revisionTime": "2016-11-10T17:56:15Z"
+		},
+		{
+			"checksumSHA1": "HSzEA32rVv/GeWvRLRQXXGXTPTA=",
+			"path": "github.com/ziutek/telnet",
+			"revision": "49d9be70897fe0a7400a152121453075b2835866",
+			"revisionTime": "2015-04-27T11:54:47Z"
+		},
+		{
+			"checksumSHA1": "dsQ5n+qfjPnd1P5wA0y9LSwbs4A=",
+			"path": "gopkg.in/natefinch/lumberjack.v2",
+			"revision": "514cbda263a734ae8caac038dadf05f8f3f9f738",
+			"revisionTime": "2016-01-25T11:17:49Z"
 		}
 	],
 	"rootPath": "github.com/xackery/discordeq"

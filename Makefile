@@ -19,10 +19,10 @@ vendor: ## Install govendor and sync vendored dependencies
 build: vendor ## Build binary
 	go build ${LDFLAGS} ${PACKAGE}
 
-build-race: vendor ## Build smite binary with race detector enabled
+build-race: vendor ## Build binary with race detector enabled
 	go build -race ${LDFLAGS} ${PACKAGE}
 
-install: vendor ## Install smite binary
+install: vendor ## Install binary
 	go install ${LDFLAGS} ${PACKAGE}
 
 build-no-gitinfo: LDFLAGS = ${NOGI_LDFLAGS}
