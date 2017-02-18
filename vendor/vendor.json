@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "0LPpWq6cGvZii9pVp+eQwxONgDc=",
+			"path": "github.com/xackery/eqemuconfig",
+			"revision": "a0390ad674f0f7cfa464652350c895481def4b7a",
+			"revisionTime": "2016-11-10T17:56:15Z"
+		}
+	],
+	"rootPath": "github.com/xackery/discordeq"
+}

@@ -1,4 +1,8 @@
 bin/
+vendor/*/
+coverage*.out
+*.prof
+cover.out
 
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
