@@ -20,7 +20,7 @@ func main() {
 }
 
 func startService() {
-	log.Println("Starting DiscordEQ v0.43")
+	log.Println("Starting DiscordEQ v0.44")
 	var option string
 	//Load config
 	config, err := eqemuconfig.GetConfig()
