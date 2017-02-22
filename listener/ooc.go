@@ -48,6 +48,7 @@ func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
 		log.Println("[OOC] Warning while checking for messages:", err.Error())
 	}
 	t.Close()
+	t = nil
 	return
 }
 
