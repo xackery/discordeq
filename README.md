@@ -52,3 +52,9 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 
 ### (Optional) Extend Telnet Timeout
 * By default, telnet's timeout is 10 minutes. You can update it's timeout to a longer duration by setting the rule Console:SessionTimeOut to a higher value.
+
+
+## How to Compile from Source.
+* This repository uses [govendor](https://github.com/kardianos/govendor).
+* Build and install govendor, and inside the discordeq directory once pulled, type `govendor sync` (Note: Your $PATH needs to point to your go/bin path to use the goevndor binary).
+* This ensures you keep versions of packages locked in properly.
