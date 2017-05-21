@@ -20,7 +20,7 @@ func main() {
 }
 
 func startService() {
-	log.Println("Starting DiscordEQ v0.44")
+	log.Println("Starting DiscordEQ v0.45")
 	var option string
 	//Load config
 	config, err := eqemuconfig.GetConfig()
@@ -34,7 +34,8 @@ func startService() {
 	if config.Discord.RefreshRate == 0 {
 		config.Discord.RefreshRate = 10
 	}
-	if strings.ToLower(config.World.Tcp.Telnet) != "enabled" {
+
+	if !isNewTelnetConfig(config) && strings.ToLower(config.World.Tcp.Telnet) != "enabled" {
 		log.Println("Telnet must be enabled for this tool to work. Check your eqemuconfig.xml, and please adjust.")
 		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
@@ -79,6 +80,10 @@ func startService() {
 	go listenToDiscord(config, &disco)
 	go listenToOOC(config, &disco)
 	select {}
+}
+
+func isNewTelnetConfig(config *eqemuconfig.Config) bool {
+	return strings.ToLower(config.World.Telnet.Enabled) == "true"
 }
 
 func listenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err error) {

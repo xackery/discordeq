@@ -56,17 +56,25 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	if t != nil {
 		return
 	}
+	ip := config.World.Telnet.Ip
+	if ip == "" {
+		ip = config.World.Tcp.Ip
+	}
+	port := config.World.Telnet.Port
+	if port == "" {
+		port = config.World.Tcp.Port
+	}
 
-	log.Printf("[OOC] Connecting to %s:%s...\n", config.World.Tcp.Ip, config.World.Tcp.Port)
+	log.Printf("[OOC] Connecting to %s:%s...\n", ip, port)
 
-	if t, err = telnet.Dial("tcp", fmt.Sprintf("%s:%s", config.World.Tcp.Ip, config.World.Tcp.Port)); err != nil {
+	if t, err = telnet.Dial("tcp", fmt.Sprintf("%s:%s", ip, port)); err != nil {
 		return
 	}
 	t.SetReadDeadline(time.Now().Add(10 * time.Second))
 	t.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	index := 0
 	skipAuth := false
-	if index, err = t.SkipUntilIndex("Username:", "Connecting established from local host, auto assuming admin"); err != nil {
+	if index, err = t.SkipUntilIndex("Username:", "Connection established from localhost, assuming admin"); err != nil {
 		return
 	}
 	if index != 0 {
