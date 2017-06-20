@@ -154,14 +154,18 @@ func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
 		}
 
 		sender := message[0:strings.Index(message, " says ooc,")]
+
+		//newTelnet added some odd garbage, this cleans it
 		sender = strings.Replace(sender, ">", "", -1) //remove duplicate prompts
 		sender = strings.Replace(sender, " ", "", -1) //clean up
 
-		if newTelnet {
-			message = message[strings.Index(message, "says ooc, '")+11 : len(message)-2]
-		} else {
-			message = message[strings.Index(message, "says ooc, '")+11 : len(message)-3]
+		padOffset := 3
+		if newTelnet { //if new telnet, offset slightly less
+			padOffset = 2
+
 		}
+		message = message[strings.Index(message, "says ooc, '")+11 : len(message)-padOffset]
+
 		sender = strings.Replace(sender, "_", " ", -1)
 
 		message = convertLinks(config.Discord.ItemUrl, message)
