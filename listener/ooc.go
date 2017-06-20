@@ -12,6 +12,8 @@ import (
 	"github.com/ziutek/telnet"
 )
 
+var newTelnet bool
+
 var lastId int
 var channelID string
 
@@ -80,6 +82,7 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	if index != 0 {
 		skipAuth = true
 		log.Println("[OOC] Skipping auth")
+		newTelnet = true
 	}
 
 	if !skipAuth {
@@ -151,7 +154,14 @@ func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
 		}
 
 		sender := message[0:strings.Index(message, " says ooc,")]
-		message = message[strings.Index(message, "says ooc, '")+11 : len(message)-3]
+		sender = strings.Replace(sender, ">", "", -1) //remove duplicate prompts
+		sender = strings.Replace(sender, " ", "", -1) //clean up
+
+		if newTelnet {
+			message = message[strings.Index(message, "says ooc, '")+11 : len(message)-2]
+		} else {
+			message = message[strings.Index(message, "says ooc, '")+11 : len(message)-3]
+		}
 		sender = strings.Replace(sender, "_", " ", -1)
 
 		message = convertLinks(config.Discord.ItemUrl, message)
