@@ -161,3 +161,10 @@ func sanitize(data string) (sData string) {
 	sData = re.ReplaceAllString(sData, "")
 	return
 }
+
+func alphanumeric(data string) (sData string) {
+	sData = data
+	re := regexp.MustCompile("[^a-zA-Z0-9_]+")
+	sData = re.ReplaceAllString(sData, "")
+	return
+}

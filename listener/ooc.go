@@ -158,11 +158,11 @@ func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
 		//newTelnet added some odd garbage, this cleans it
 		sender = strings.Replace(sender, ">", "", -1) //remove duplicate prompts
 		sender = strings.Replace(sender, " ", "", -1) //clean up
+		sender = alphanumeric(sender)                 //purify name to be alphanumeric
 
 		padOffset := 3
-		if newTelnet { //if new telnet, offset slightly less
+		if newTelnet { //if new telnet, offsetis 2 off.
 			padOffset = 2
-
 		}
 		message = message[strings.Index(message, "says ooc, '")+11 : len(message)-padOffset]
 

@@ -42,7 +42,7 @@ func (d *Discord) GetGuilds() (guilds []*discordgo.UserGuild, err error) {
 		}
 	}
 
-	guilds, err = d.instance.UserGuilds()
+	guilds, err = d.instance.UserGuilds(0, "", "")
 	if err != nil {
 		return
 	}
