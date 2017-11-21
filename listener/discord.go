@@ -100,7 +100,7 @@ func commandParse(s *discordgo.Session, m *discordgo.MessageCreate) {
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	ign := ""
-	member, err := s.State.Member(config.Discord.ServerID, m.Author.ID)
+	member, err := s.GuildMember(config.Discord.ServerID, m.Author.ID)
 	if err != nil {
 		log.Printf("[Discord] Failed to get member: %s (Make sure you have set the bot permissions to see members)", err.Error())
 		return
