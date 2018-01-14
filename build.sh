@@ -1,5 +1,5 @@
 set -e 
-export VERSION="0.47"
+export VERSION="0.49"
 export NAME="discordeq"
 rm -rf bin/*
 echo "Building Linux"
