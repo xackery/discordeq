@@ -35,29 +35,29 @@ func startService() {
 		config.Discord.RefreshRate = 10
 	}
 
-	if !isNewTelnetConfig(config) && strings.ToLower(config.World.Tcp.Telnet) != "enabled" {
-		log.Println("Telnet must be enabled for this tool to work. Check your eqemuconfig.xml, and please adjust.")
+	if !isNewTelnetConfig(config) {
+		log.Println("Telnet must be enabled for this tool to work. Check your eqemu_config, and please adjust.")
 		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.Username == "" {
-		applog.Error.Println("I don't see a username set in your <discord><username> section of eqemu_config.xml, please adjust.")
+		applog.Error.Println("I don't see a username set in your <discord><username> section of eqemu_config, please adjust.")
 		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.Password == "" {
-		applog.Error.Println("I don't see a password set in your <discord><password> section of eqemu_config.xml, please adjust.")
+		applog.Error.Println("I don't see a password set in your <discord><password> section of eqemu_config, please adjust.")
 		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.ServerID == "" {
-		applog.Error.Println("I don't see a serverid set in your <discord><serverid> section of eqemuconfig.xml, please adjust.")
+		applog.Error.Println("I don't see a serverid set in your <discord><serverid> section of eqemuconfig, please adjust.")
 		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
@@ -83,7 +83,14 @@ func startService() {
 }
 
 func isNewTelnetConfig(config *eqemuconfig.Config) bool {
-	return strings.ToLower(config.World.Telnet.Enabled) == "true"
+	fmt.Println(config)
+	if strings.ToLower(config.World.Telnet.Enabled) == "true" {
+		return true
+	}
+	if strings.ToLower(config.World.Tcp.Telnet) == "enabled" {
+		return true
+	}
+	return false
 }
 
 func listenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err error) {
