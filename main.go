@@ -25,7 +25,7 @@ func startService() {
 	//Load config
 	config, err := eqemuconfig.GetConfig()
 	if err != nil {
-		applog.Error.Println("Error while loading eqemu_config.xml to start:", err.Error())
+		applog.Error.Println("Error while loading eqemu_config to start:", err.Error())
 		fmt.Println("press a key then enter to exit.")
 
 		fmt.Scan(&option)
@@ -43,28 +43,28 @@ func startService() {
 	}
 
 	if config.Discord.Username == "" {
-		applog.Error.Println("I don't see a username set in your <discord><username> section of eqemu_config, please adjust.")
+		applog.Error.Println("I don't see a username set in your discord > username section of eqemu_config, please adjust.")
 		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.Password == "" {
-		applog.Error.Println("I don't see a password set in your <discord><password> section of eqemu_config, please adjust.")
+		applog.Error.Println("I don't see a password set in your discord > password section of eqemu_config, please adjust.")
 		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.ServerID == "" {
-		applog.Error.Println("I don't see a serverid set in your <discord><serverid> section of eqemuconfig, please adjust.")
+		applog.Error.Println("I don't see a serverid set in your discord > serverid section of eqemuconfig, please adjust.")
 		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
 	}
 
 	if config.Discord.ChannelID == "" {
-		applog.Error.Println("I don't see a channelid set in your <discord><channelid> section of eqemuconfig.xml, please adjust.")
+		applog.Error.Println("I don't see a channelid set in your  discord > channelid section of eqemuconfig.xml, please adjust.")
 		fmt.Println("press a key then enter to exit.")
 		fmt.Scan(&option)
 		os.Exit(1)
@@ -83,7 +83,6 @@ func startService() {
 }
 
 func isNewTelnetConfig(config *eqemuconfig.Config) bool {
-	fmt.Println(config)
 	if strings.ToLower(config.World.Telnet.Enabled) == "true" {
 		return true
 	}
