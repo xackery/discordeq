@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/eqemuconfig"
+	"github.com/xackery/discordeq/discord"
 	"github.com/ziutek/telnet"
 )
 
