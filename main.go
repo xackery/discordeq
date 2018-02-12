@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/xackery/discordeq/applog"
@@ -41,6 +42,13 @@ func startService() {
 		os.Exit(1)
 	}
 
+	if config.Discord.Password == "" && config.Discord.ClientID == "" {
+		applog.Error.Println("I don't see a password set in your discord > password section of eqemu_config, as well as no client id, please adjust.")
+		fmt.Println("press a key then enter to exit.")
+		fmt.Scan(&option)
+		os.Exit(1)
+	}
+
 	if config.Discord.ServerID == "" {
 		applog.Error.Println("I don't see a serverid set in your <discord><serverid> section of eqemuconfig.xml, please adjust.")
 		fmt.Println("press a key then enter to exit.")
@@ -69,8 +77,16 @@ func startService() {
 
 func listenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err error) {
 	for {
-		applog.Info.Println("[Discord] Connecting as", config.Discord.Username, "...")
+		if len(config.Discord.Password) > 0 { //don't show username if it's token based
+			applog.Info.Println("[Discord] Connecting as", config.Discord.Username, "...")
+		} else {
+			applog.Info.Println("[Discord] Connecting...")
+		}
 		if err = listener.ListenToDiscord(config, disco); err != nil {
+			if strings.Contains(err.Error(), "Unauthorized") {
+				applog.Info.Printf("Your bot is not authorized to access this server.\nClick this link and give the bot access: https://discordapp.com/oauth2/authorize?&client_id=%s&scope=bot&permissions=0", config.Discord.ClientID)
+				return
+			}
 			applog.Error.Println("[Discord] Disconnected with error:", err.Error())
 		}
 
