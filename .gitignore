@@ -1,4 +1,41 @@
+<<<<<<< HEAD
 dailyreport.yml
 eqemu_config.xml
 main
 discordeq.log
+=======
+bin/
+vendor/*/
+coverage*.out
+*.prof
+cover.out
+eqemu_config.json
+eqemu_config.xml
+
+discordeq.log
+
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Folders
+_obj
+_test
+
+# Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+
+_testmain.go
+
+*.exe
+*.test
+*.prof
+>>>>>>> master

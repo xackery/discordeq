@@ -2,16 +2,27 @@ package discord
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
+//Discord wraps discord objects
 type Discord struct {
 	instance     *discordgo.Session
 	lastUsername string
 	lastPassword string
 }
 
+//Connect to a discord endpoint
 func (d *Discord) Connect(username string, password string) (err error) {
-	if d.instance, err = discordgo.New(username, password); err != nil {
+	if len(password) > 0 {
+		if d.instance, err = discordgo.New(username, password); err != nil {
+			err = errors.Wrap(err, "failed to connect with user/pass")
+			return
+		}
+	}
+	d.instance, err = discordgo.New(username)
+	if err != nil {
+		err = errors.Wrap(err, "failed to connect with token")
 		return
 	}
 	return

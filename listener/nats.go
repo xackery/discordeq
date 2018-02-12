@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/eqemu/server/protobuf/go/eqproto"
+	"github.com/EQEmu/Server/protobuf/go/eqproto"
 	"github.com/go-yaml/yaml"
 	"github.com/golang/protobuf/proto"
 	"github.com/nats-io/go-nats"
