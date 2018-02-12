@@ -23,7 +23,7 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 * Click My Apps on the top left area.
 * Click + New App
 * Write anything you wish for the app name, click Create App
-* Copy the clientid into your discord into the {CHANNELID} field in eqemu_config
+* Copy the clientid into your discord into the {CLIENTID} field in eqemu_config
 * Scroll down to the bot section, and click Create Bot User
 * Confirm with Yes, Do it!
 * Make sure Public Bot is unchecked, as well as oauth2 grant.
