@@ -49,13 +49,6 @@ func startService() {
 		os.Exit(1)
 	}
 
-	if config.Discord.Password == "" {
-		applog.Error.Println("I don't see a password set in your discord > password section of eqemu_config, please adjust.")
-		fmt.Println("press a key then enter to exit.")
-		fmt.Scan(&option)
-		os.Exit(1)
-	}
-
 	if config.Discord.ServerID == "" {
 		applog.Error.Println("I don't see a serverid set in your discord > serverid section of eqemuconfig, please adjust.")
 		fmt.Println("press a key then enter to exit.")

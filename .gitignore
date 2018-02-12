@@ -3,7 +3,8 @@ vendor/*/
 coverage*.out
 *.prof
 cover.out
-
+eqemu_config.json
+eqemu_config.xml
 
 discordeq.log
 
