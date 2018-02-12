@@ -40,11 +40,6 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 * If you don't have a website with itemlinks, remove the {ITEMURL} entry all together and keep it empty. Discord will italics itemlinks in game when displayed on Discord then.
 
 
-### Enable Telnet
-* Look through eqemu_config and you will find an option for telnet="enabled".
-
-### Set a telnet account password
-* Go to your Accounts table on the DB, and set a password for one of your GM accounts. You can manually enter a password in there, plain text, and copy/paste it into the <telnetpassword> field in your eqemu_config.xml.
 
 ### Run DiscordEQ
 * Your first run should fail with an unauthorized notification, since you have not given your bot permissions to your server yet.  You will see a link on the bottom you can copy paste into a browser, and give it permission to access your server.
@@ -56,7 +51,3 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 * Go to Roles.
 * Create a new role, with the name: `IGN: <username>`. The `IGN:` prefix is required for DiscordEQ to detect a player and is used to identify the player in game, For example, to identify the discord user `Xackery` as `Shin`, I would create a role named `IGN: Shin`, right click the user Xackery, and assign the role to them.
 * If the above user chats inside the assigned channel, their message will appear in game as `Shin says from discord, 'Their Message Here'`
-
-### (Optional) Extend Telnet Timeout
-* By default, telnet's timeout is 10 minutes. You can update it's timeout to a longer duration by setting the rule Console:SessionTimeOut to a higher value.
-
