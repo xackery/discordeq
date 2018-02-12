@@ -101,7 +101,7 @@ func listenToDiscord(config *eqemuconfig.Config, disco *discord.Discord) (err er
 		}
 		if err = listener.ListenToDiscord(config, disco); err != nil {
 			if strings.Contains(err.Error(), "Unauthorized") {
-				applog.Info.Printf("Your bot is not authorized to access this server.\nClick this link and give the bot access: https://discordapp.com/oauth2/authorize?&client_id=%s&scope=bot&permissions=0", config.Discord.ClientID)
+				applog.Info.Printf("Your bot is not authorized to access this server.\nClick this link and give the bot access: https://discordapp.com/oauth2/authorize?&client_id=%s&scope=bot&permissions=268446736", config.Discord.ClientID)
 				return
 			}
 			applog.Error.Println("[Discord] Disconnected with error:", err.Error())

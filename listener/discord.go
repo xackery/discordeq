@@ -15,21 +15,9 @@ var disco *discord.Discord
 
 func ListenToDiscord(config *eqemuconfig.Config, disc *discord.Discord) (err error) {
 	var session *discordgo.Session
-	var guild *discordgo.Guild
 	disco = disc
-	//log.Println("Listen to discord..")
 	if session, err = disco.GetSession(); err != nil {
 		log.Printf("[Discord] Failed to get instance %s: %s (Make sure bot is part of server)", config.Discord.ServerID, err.Error())
-		return
-	}
-
-	if guild, err = session.Guild(config.Discord.ServerID); err != nil {
-		log.Printf("[Discord] Failed to get server %s: %s (Make sure bot is part of server)", config.Discord.ServerID, err.Error())
-		return
-	}
-
-	if guild.Unavailable {
-		log.Printf("[Discord] Failed to get server %s: Server unavailable (Make sure bot is part of server, and has permission)", config.Discord.ServerID)
 		return
 	}
 
