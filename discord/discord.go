@@ -20,7 +20,7 @@ func (d *Discord) Connect(username string, password string) (err error) {
 			return
 		}
 	}
-	d.instance, err = discordgo.New(username)
+	d.instance, err = discordgo.New("Bot " + username)
 	if err != nil {
 		err = errors.Wrap(err, "failed to connect with token")
 		return
