@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/xackery/eqemuconfig"
 	"github.com/xackery/discordeq/discord"
+	"github.com/xackery/eqemuconfig"
 )
 
 var disco *discord.Discord
@@ -61,7 +61,7 @@ func commandParse(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	allowedCommands := []string{"unlock", "who", "lock", "setidentity", "worldshutdown"}
+	allowedCommands := []string{"unlock", "who", "lock", "worldshutdown"}
 	//figure out command, remove the ! bang
 	commandSplit := strings.Split(m.Message.Content[1:], " ")
 	parameters := commandSplit[1:]
