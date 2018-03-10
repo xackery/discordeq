@@ -2,29 +2,24 @@ package listener
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/EQEmu/Server/protobuf/go/eqproto"
-	"github.com/go-yaml/yaml"
 	"github.com/golang/protobuf/proto"
 	"github.com/nats-io/go-nats"
-	"github.com/robfig/cron"
 	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/eqemuconfig"
 )
 
 var (
-	newNATS     bool
-	nc          *nats.Conn
-	isCronSet   bool
-	chanType    string
-	ok          bool
-	dailyReport DailyReport
-	chans       = map[int]string{
+	newNATS   bool
+	nc        *nats.Conn
+	isCronSet bool
+	chanType  string
+	ok        bool
+	chans     = map[int]string{
 		4:   "auctions:",
 		5:   "OOC:",
 		13:  "", //encounter
@@ -36,18 +31,6 @@ var (
 		269: "", //broadcast
 	}
 )
-
-type DailyReport struct {
-	DailyGains map[int32]*DailyGain
-}
-
-type DailyGain struct {
-	CharacterId int32
-	Identity    string
-	Exp         int32
-	Lvl         int32
-	Money       int32
-}
 
 func GetNATS() (conn *nats.Conn) {
 	conn = nc
@@ -90,17 +73,9 @@ func connectNATS(config *eqemuconfig.Config) (err error) {
 }
 
 func checkForNATSMessages(nc *nats.Conn, disco *discord.Discord) (err error) {
-	if !isCronSet {
-		isCronSet = true
-		c := cron.New()
-		c.AddFunc("@midnight", DoDailyReport)
-		c.Start()
-	}
 
-	LoadDailyReport()
-
-	nc.Subscribe("ChannelMessage", OnChannelMessage)
-	nc.Subscribe("AdminMessage", OnAdminMessage)
+	nc.Subscribe("world.channel_message", OnChannelMessage)
+	nc.Subscribe("admin_message", OnAdminMessage)
 
 	for {
 		if nc.Status() != nats.CONNECTED {
@@ -131,7 +106,7 @@ func SendCommand(author string, command string, parameters []string) (err error)
 	}
 
 	var msg *nats.Msg
-	if msg, err = nc.Request("CommandMessageWorld", cmd, 2*time.Second); err != nil {
+	if msg, err = nc.Request("world.command_message", cmd, 2*time.Second); err != nil {
 		return
 	}
 
@@ -159,7 +134,7 @@ func OnAdminMessage(nm *nats.Msg) {
 		return
 	}
 
-	log.Printf("[NATS] AdminMessage: %s\n", channelMessage.Message)
+	log.Printf("[NATS] : %s\n", channelMessage.Message)
 }
 
 func OnChannelMessage(nm *nats.Msg) {
@@ -231,76 +206,9 @@ func sendNATSMessage(from string, message string) {
 		log.Printf("[NATS] Error marshalling %s %s: %s", from, message, err.Error())
 		return
 	}
-	err = nc.Publish("ChannelMessageWorld", msg)
+	err = nc.Publish("world.channel_message", msg)
 	if err != nil {
 		log.Printf("[NATS] Error publishing: %s", err.Error())
 		return
-	}
-}
-
-func DoDailyReport() {
-	var err error
-	topLvl := int32(-1)
-	topExp := int32(-1)
-	topMoney := int32(-1)
-	for k, v := range dailyReport.DailyGains {
-		if topExp < 0 || v.Exp > dailyReport.DailyGains[topExp].Exp {
-			topExp = k
-		}
-		if topLvl < 0 || v.Lvl > dailyReport.DailyGains[topLvl].Lvl {
-			topLvl = k
-		}
-		if topMoney < 0 || v.Money > dailyReport.DailyGains[topMoney].Money {
-			topMoney = k
-		}
-	}
-	if _, err = disco.SendMessage(channelID, "==== 24 Hour Report ===="); err != nil {
-		log.Printf("[NATS] Failed to send 24 hour report: %s", err.Error())
-		return
-	}
-	if topExp >= 0 {
-		if _, err = disco.SendMessage(channelID, fmt.Sprintf("Top Experince Gains: %s with %0.2f bottles worth of experience!", dailyReport.DailyGains[topExp].Identity, float32(dailyReport.DailyGains[topExp].Exp/23976503))); err != nil {
-			log.Printf("[NATS] Error sending message: %s", err.Error())
-			return
-		}
-	}
-	if topLvl >= 0 {
-		if _, err = disco.SendMessage(channelID, fmt.Sprintf("Top Level Gains: %s with %d levels gained!", dailyReport.DailyGains[topLvl].Identity, int(dailyReport.DailyGains[topLvl].Lvl))); err != nil {
-			log.Printf("[NATS] Error sending message: %s", err.Error())
-			return
-		}
-	}
-	if topExp >= 0 {
-		if _, err = disco.SendMessage(channelID, fmt.Sprintf("Top Money Gains: %s with %0.2f platinum earned!", dailyReport.DailyGains[topMoney].Identity, float32(dailyReport.DailyGains[topMoney].Money/1000))); err != nil {
-			log.Printf("[NATS] Error sending message: %s", err.Error())
-			return
-		}
-	}
-	//flush daily reports
-	dailyReport.DailyGains = map[int32]*DailyGain{}
-}
-
-func SaveDailyReport() {
-	var err error
-	out, err := yaml.Marshal(&dailyReport)
-	if err != nil {
-		log.Fatal("Error marshalling daily report:", err.Error())
-	}
-	ioutil.WriteFile("dailyreport.yml", out, 0644)
-}
-
-func LoadDailyReport() {
-	var err error
-	if _, err := os.Stat("dailyreport.yml"); os.IsNotExist(err) {
-		SaveDailyReport()
-		return
-	}
-	inFile, err := ioutil.ReadFile("dailyreport.yml")
-	if err != nil {
-		log.Fatal("Failed to parse dailyreport.yml:", err.Error())
-	}
-	err = yaml.Unmarshal(inFile, &dailyReport)
-	if err != nil {
-		log.Fatal("Failed to unmarshal dailyreport.yml:", err.Error())
 	}
 }
