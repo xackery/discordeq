@@ -74,8 +74,8 @@ func connectNATS(config *eqemuconfig.Config) (err error) {
 
 func checkForNATSMessages(nc *nats.Conn, disco *discord.Discord) (err error) {
 
-	nc.Subscribe("world.channel_message", OnChannelMessage)
-	nc.Subscribe("admin_message", OnAdminMessage)
+	nc.Subscribe("world.channel_message.out", OnChannelMessage)
+	nc.Subscribe("global.admin_message.out", OnAdminMessage)
 
 	for {
 		if nc.Status() != nats.CONNECTED {
