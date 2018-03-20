@@ -32,11 +32,7 @@ var (
 	}
 )
 
-func GetNATS() (conn *nats.Conn) {
-	conn = nc
-	return
-}
-
+//ListenToNATS will begin the NATS listener polling for new messages
 func ListenToNATS(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
 	var err error
 	config = eqconfig
@@ -87,9 +83,10 @@ func checkForNATSMessages(nc *nats.Conn, disco *discord.Discord) (err error) {
 	return
 }
 
+//SendCommand will send a command to NATS
 func SendCommand(author string, command string, parameters []string) (err error) {
 	if nc == nil {
-		err = fmt.Errorf("nats is not connected.")
+		err = fmt.Errorf("nats is not connected")
 		return
 	}
 
@@ -124,6 +121,7 @@ func SendCommand(author string, command string, parameters []string) (err error)
 	return
 }
 
+//OnAdminMessage handles incoming NATS admin messages
 func OnAdminMessage(nm *nats.Msg) {
 	var err error
 	channelMessage := &eqproto.ChannelMessage{}
@@ -137,6 +135,7 @@ func OnAdminMessage(nm *nats.Msg) {
 	log.Printf("[NATS] : %s\n", channelMessage.Message)
 }
 
+//OnChannelMessage handles incoming NATS channel messages
 func OnChannelMessage(nm *nats.Msg) {
 	var err error
 	channelMessage := &eqproto.ChannelMessage{}

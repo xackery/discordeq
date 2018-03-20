@@ -7,35 +7,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xackery/eqemuconfig"
 	"github.com/xackery/discordeq/discord"
+	"github.com/xackery/eqemuconfig"
 	"github.com/ziutek/telnet"
 )
 
 var newTelnet bool
 
-var lastId int
 var channelID string
 
-type UserMessage struct {
-	Id         int       `db:"id"`
-	From       string    `db:"from"`
-	To         string    `db:"to"`
-	Message    string    `db:"message"`
-	Type       int       `db:"type"`
-	CreateDate time.Time `db:"timerecorded"`
-}
-
-var userMessages []UserMessage
 var config *eqemuconfig.Config
 
 var t *telnet.Conn
 
-func GetTelnet() (conn *telnet.Conn) {
-	conn = t
-	return
-}
-
+//ListenToOOC begins listening to discord OOC chat
 func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
 	var err error
 	config = eqconfig
@@ -112,8 +97,8 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	return
 }
 
+//Sendln is used for telnet message sending
 func Sendln(s string) (err error) {
-
 	buf := make([]byte, len(s)+1)
 	copy(buf, s)
 	buf[len(s)] = '\n'

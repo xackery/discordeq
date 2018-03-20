@@ -13,6 +13,7 @@ import (
 
 var disco *discord.Discord
 
+//ListenToDiscord will start polling discord events
 func ListenToDiscord(config *eqemuconfig.Config, disc *discord.Discord) (err error) {
 	var session *discordgo.Session
 	disco = disc
