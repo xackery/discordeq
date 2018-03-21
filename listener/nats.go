@@ -103,7 +103,7 @@ func SendCommand(author string, command string, parameters []string) (err error)
 	}
 
 	var msg *nats.Msg
-	if msg, err = nc.Request("world.command_message", cmd, 2*time.Second); err != nil {
+	if msg, err = nc.Request("world.command_message.in", cmd, 2*time.Second); err != nil {
 		return
 	}
 
@@ -113,8 +113,13 @@ func SendCommand(author string, command string, parameters []string) (err error)
 		return
 	}
 
-	if _, err = disco.SendMessage(config.Discord.CommandChannelID, fmt.Sprintf("**%s** %s: %s", commandMessage.Author, commandMessage.Command, commandMessage.Result)); err != nil {
-		log.Printf("[NATS] Error sending message (%s: %s) %s", commandMessage.Author, commandMessage.Result, err.Error())
+	if commandMessage.ResponseError > 0 {
+		err = fmt.Errorf("Response error: (%s) %s", commandMessage.ResponseError, commandMessage.ResponseMessage)
+		return
+	}
+
+	if _, err = disco.SendMessage(config.Discord.CommandChannelID, fmt.Sprintf("**%s** %s: %s", commandMessage.Author, commandMessage.Command, commandMessage.ResponseMessage)); err != nil {
+		log.Printf("[NATS] Error sending message (%s: %s) %s", commandMessage.Author, commandMessage.ResponseMessage, err.Error())
 		err = nil
 		return
 	}
@@ -141,12 +146,8 @@ func OnChannelMessage(nm *nats.Msg) {
 	channelMessage := &eqproto.ChannelMessage{}
 	proto.Unmarshal(nm.Data, channelMessage)
 
-	if channelMessage.IsEmote {
-		channelMessage.ChanNum = channelMessage.Type
-	}
-
-	if chanType, ok = chans[int(channelMessage.ChanNum)]; !ok {
-		log.Printf("[NATS] Unknown channel: %d with message: %s", channelMessage.ChanNum, channelMessage.Message)
+	if chanType, ok = chans[int(channelMessage.Number)]; !ok {
+		log.Printf("[NATS] Unknown channel: %d with message: %s", channelMessage.Number, channelMessage.Message)
 		return
 	}
 
@@ -162,19 +163,19 @@ func OnChannelMessage(nm *nats.Msg) {
 	}
 
 	//message = message[strings.Index(message, "says ooc, '")+11 : len(message)-padOffset]
-	if channelMessage.ChanNum == 269 && strings.Contains(channelMessage.Message, "opened a box to find") {
+	if channelMessage.Number == 269 && strings.Contains(channelMessage.Message, "opened a box to find") {
 		channelMessage.From = ":gift:"
 		channelMessage.Message += " :gift:"
 	}
-	if channelMessage.ChanNum == 15 {
+	if channelMessage.Number == 15 {
 		channelMessage.From = ":loudspeaker:"
 	}
 
-	if channelMessage.ChanNum == 269 && strings.Contains(channelMessage.Message, "Welcome back to the server,") {
+	if channelMessage.Number == 269 && strings.Contains(channelMessage.Message, "Welcome back to the server,") {
 		channelMessage.From = ":hand_splayed::skin-tone-1:"
 	}
 
-	if channelMessage.ChanNum == 13 && strings.Contains(channelMessage.Message, "successfully stopped") {
+	if channelMessage.Number == 13 && strings.Contains(channelMessage.Message, "successfully stopped") {
 		channelMessage.From = ":whale:"
 		channelMessage.Message += " :crocodile:"
 	}
@@ -185,7 +186,7 @@ func OnChannelMessage(nm *nats.Msg) {
 		return
 	}
 
-	log.Printf("[NATS] %d %s: %s\n", channelMessage.ChanNum, channelMessage.From, channelMessage.Message)
+	log.Printf("[NATS] %d %s: %s\n", channelMessage.Number, channelMessage.From, channelMessage.Message)
 }
 
 func sendNATSMessage(from string, message string) {
@@ -197,7 +198,7 @@ func sendNATSMessage(from string, message string) {
 		//From:    from + " says from discord, '",
 		IsEmote: true,
 		Message: fmt.Sprintf("%s says from discord, '%s'", from, message),
-		ChanNum: 260,
+		Number:  260,
 		Type:    260,
 	}
 	msg, err := proto.Marshal(channelMessage)
@@ -205,9 +206,18 @@ func sendNATSMessage(from string, message string) {
 		log.Printf("[NATS] Error marshalling %s %s: %s", from, message, err.Error())
 		return
 	}
-	err = nc.Publish("world.channel_message", msg)
+	bResp, err := nc.Request("world.channel_message.in", msg, 1*time.Second)
 	if err != nil {
 		log.Printf("[NATS] Error publishing: %s", err.Error())
+		return
+	}
+	err = proto.Unmarshal(bResp.Data, channelMessage)
+	if err != nil {
+		log.Printf("[NATS] Error unmarshalling response: %s", err.Error())
+		return
+	}
+	if channelMessage.ResponseError > 0 {
+		log.Printf("[NATS] Error with discord response: (%s) %s", channelMessage.ResponseError, channelMessage.ResponseMessage)
 		return
 	}
 }
