@@ -50,6 +50,9 @@ func onMessageEvent(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func commandParse(s *discordgo.Session, m *discordgo.MessageCreate) {
+	//This feature is currently not supported.
+	return
+
 	//Verify user is allowed to send commands
 	isAllowed := false
 	for _, admin := range config.Discord.Admins {
