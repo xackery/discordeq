@@ -1,5 +1,5 @@
 set -e 
-export VERSION="0.50"
+export VERSION="0.51"
 export NAME="discordeq"
 echo "Preparing discordeq v${VERSION}"
 rm -rf bin/*
