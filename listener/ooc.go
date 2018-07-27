@@ -46,7 +46,7 @@ func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
 		return
 	}
 
-	if err = checkForMessages(t, disco); err != nil {
+	if err = checkForMessages(config, t, disco); err != nil {
 		log.Println("[OOC] Warning while checking for messages:", err.Error())
 	}
 	t.Close()
@@ -130,7 +130,7 @@ func Sendln(s string) (err error) {
 	return
 }
 
-func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
+func checkForMessages(config *eqemuconfig.Config, t *telnet.Conn, disco *discord.Discord) (err error) {
 	data := []byte{}
 	message := ""
 	for {
@@ -171,7 +171,11 @@ func checkForMessages(t *telnet.Conn, disco *discord.Discord) (err error) {
 		message = convertLinks(config.Discord.ItemUrl, message)
 
 		if _, err = disco.SendMessage(channelID, fmt.Sprintf("**%s OOC**: %s", sender, message)); err != nil {
-			log.Printf("[OOC] Error sending message (%s: %s) %s", sender, message, err.Error())
+			errStr := err.Error()
+			if strings.Contains(err.Error(), "Unauthorized") {
+				errStr = fmt.Sprintf("%s (try visiting: https://discordapp.com/oauth2/authorize?&client_id=%s&scope=bot&permissions=2146958591 to give access)", err.Error(), config.Discord.ClientID)
+			}
+			log.Printf("[OOC] Error sending message (%s: %s) %s", sender, message, errStr)
 			continue
 		}
 		log.Printf("[OOC] %s: %s\n", sender, message)

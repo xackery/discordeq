@@ -28,6 +28,7 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 * Confirm with Yes, Do it!
 * Make sure Public Bot is unchecked, as well as oauth2 grant.
 * Save, click to reveal the token. Copy the bot token into your {YOURTOKEN} field in eqemu_config, under username
+* Visit the link: https://discordapp.com/oauth2/authorize?&client_id={CLIENTID}&scope=bot&permissions=2146958591 changing {CLIENTID} to your client ID.
 
 ### Prepare server, channel IDs
 * Inside Discord, right click your server's circular icon and on the bottom choose Copy ID.
