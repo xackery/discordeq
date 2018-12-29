@@ -57,3 +57,7 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 * Create a new role, with the name: `IGN: <username>`. The `IGN:` prefix is required for DiscordEQ to detect a player and is used to identify the player in game, For example, to identify the discord user `Xackery` as `Shin`, Create a role named `IGN: Shin`, right click the user Xackery, and assign the role to them.
 * If the above user chats inside the assigned channel, their message will appear in game as `Shin says from discord, 'Their Message Here'`
 
+### Troubleshooting and info
+* At this point you should be seeing bidirectional chat functioning, but if not here's some details that may be helpful if it doesn't work first run.
+* If you get messages noting Discord is Unauthorized, then your bot is likely not properly authorized via the Visit the link: https://discordapp.com/oauth2/authorize?&client_id={CLIENTID}&scope=bot&permissions=2146958591 changing {CLIENTID} to your client ID. link.
+* Firewall doesn't matter, as by default, discordeq's settings will try to connect to localhost 
