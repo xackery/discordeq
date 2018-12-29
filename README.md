@@ -12,8 +12,7 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
          "refreshrate" : "15",
          "clientid": "{CLIENTID}",
          "serverid" : "{SERVERID}",
-         "username" : "{YOURTOKEN}",
-         "commandchannelid": "{YOURCOMMANDCHANNELID}"
+         "username" : "{YOURTOKEN}"
       },
 ```
 * each section above with {WORD} sections will be populated with data as you follow below steps.
@@ -40,24 +39,21 @@ This plugin allows Everquest to communicate with Discord in a bidirectional mann
 * If you have a website that has item links, replace the {ITEMURL} field with the website, e.g. "http://yoursite.com/item.php?id=". It is assumed your item id's are appended to the end of the url link.
 * If you don't have a website with itemlinks, remove the {ITEMURL} entry all together and keep it empty. Discord will italics itemlinks in game when displayed on Discord then.
 
-
 ### Enable Telnet
-* Look through eqemu_config and you will find an option for telnet="enabled".
-
-### Set a telnet account password
-* Go to your Accounts table on the DB, and set a password for one of your GM accounts. You can manually enter a password in there, plain text, and copy/paste it into the <telnetpassword> field in your eqemu_config.xml.
-
-### Run DiscordEQ
-* Your first run should fail with an unauthorized notification, since you have not given your bot permissions to your server yet.  You will see a link on the bottom you can copy paste into a browser, and give it permission to access your server.
-
+* Inside your eqemu_config.json, look for a section that reads:
+```json
+"telnet": {
+     "ip": "0.0.0.0",
+     "port": "9000",
+     "enabled": "true"
+},
+```
+* Make sure the `"enabled": "true"` field is set to true. If you don't have any mentions of telnet like the above, it will fall under the Server > World > Telnet nodes, you can see an example of this here: https://github.com/Akkadius/EQEmuInstall/blob/master/eqemu_config.json but chances are if you're using Akka's Easy Installer, you had this enabled by default.
 
 ### Enabling Players to talk from Discord to EQ
-* Admin-level accounts can only do the following steps.
-* To allow this, inside discord go to Server Settings.
+* (Admin-level accounts on Discord can only do the following steps.)
+* Inside discord go to Server Settings.
 * Go to Roles.
-* Create a new role, with the name: `IGN: <username>`. The `IGN:` prefix is required for DiscordEQ to detect a player and is used to identify the player in game, For example, to identify the discord user `Xackery` as `Shin`, I would create a role named `IGN: Shin`, right click the user Xackery, and assign the role to them.
+* Create a new role, with the name: `IGN: <username>`. The `IGN:` prefix is required for DiscordEQ to detect a player and is used to identify the player in game, For example, to identify the discord user `Xackery` as `Shin`, Create a role named `IGN: Shin`, right click the user Xackery, and assign the role to them.
 * If the above user chats inside the assigned channel, their message will appear in game as `Shin says from discord, 'Their Message Here'`
-
-### (Optional) Extend Telnet Timeout
-* By default, telnet's timeout is 10 minutes. You can update it's timeout to a longer duration by setting the rule Console:SessionTimeOut to a higher value.
 
