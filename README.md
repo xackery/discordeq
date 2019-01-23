@@ -23,7 +23,6 @@ A break down of the steps you will need to follow:
                "serverid" : "44444",
                "username" : "55555abc"
         },
-       ....
 }
 ```
 * 
