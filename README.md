@@ -15,13 +15,13 @@ A break down of the steps you will need to follow:
 {
 	"server": {
 		"discord" : {
-			"channelid" : "11111",
-               "itemurl" : "",
-               "refreshrate" : "15",
-			"clientid": "22222",
-			"clientsecret": "33333",
-               "serverid" : "44444",
-               "username" : "55555abc"
+		"channelid" : "11111",
+               	"itemurl" : "",
+               	"refreshrate" : "15",
+	       	"clientid": "22222",
+		"clientsecret": "33333",
+               	"serverid" : "44444",
+               	"username" : "55555abc"
         },
 }
 ```
