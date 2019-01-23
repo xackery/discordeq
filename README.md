@@ -22,8 +22,9 @@ A break down of the steps you will need to follow:
 			"clientsecret": "33333",
 			"serverid" : "44444",
 			"username" : "55555abc"
-		}
-        },
+		},
+		/* ignore this, but other configuration options will be here, like host, chatserver, etc */
+        }
 }
 ```
 * 
