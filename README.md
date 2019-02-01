@@ -39,7 +39,7 @@ A break down of the steps you will need to follow:
 * Confirm creating a bot with Yes, Do it!
 * Make sure Public Bot is unchecked, as well as oauth2 grant.
 * Save, click to reveal the token. Copy the bot token, changing the username 55555abc to this new token
-* Copy this link https://discordapp.com/oauth2/authorize?&client_id=22222&scope=bot&permissions=2146958591 , change the 22222 inside the link to your client id you obtained earlier. Visit it, and you will get a discord prompt to authorize the bot to access your server.
+* Copy this link https://discordapp.com/oauth2/authorize?&client_id=22222&scope=bot&permissions=2146958591 , change the 22222 inside the link to your client id you obtained earlier. Visit it, and you will get a discord prompt to authorize the bot to access your server. If you do this step correctly, an offline version of your bot should appear in the members list of your discord server.
 
 ### Prepare server, channel IDs
 * Inside Discord, right click your server's circular icon and on the bottom choose Copy ID.
@@ -71,6 +71,6 @@ A break down of the steps you will need to follow:
 * If the above user chats inside the assigned channel, their message will appear in game as `Shin says from discord, 'Their Message Here'`
 
 ### Troubleshooting and info
+* Your offline bot should go to "online" mode on the member list when you start discordeq. if it isn't, you likely are having an authorization issue (copied the user token incorrectly). Visit the link  again: https://discordapp.com/oauth2/authorize?&client_id={CLIENTID}&scope=bot&permissions=2146958591 changing {CLIENTID} to your client ID.
 * At this point you should be seeing bidirectional chat functioning, but if not here's some details that may be helpful if it doesn't work first run.
-* If you get messages noting Discord is Unauthorized, then your bot is likely not properly authorized via the Visit the link: https://discordapp.com/oauth2/authorize?&client_id={CLIENTID}&scope=bot&permissions=2146958591 changing {CLIENTID} to your client ID. link.
-* Firewall doesn't matter, as by default, discordeq's settings will try to connect to localhost 
+* Firewall doesn't matter, as by default, discordeq's settings will try to connect to localhost telnet.
