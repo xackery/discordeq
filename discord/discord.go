@@ -28,6 +28,7 @@ func (d *Discord) Connect(username string, password string) (err error) {
 	return
 }
 
+// GetName returns user's name
 func (d *Discord) GetName() (name string) {
 	if d.instance == nil {
 		err := d.Connect(d.lastUsername, d.lastPassword)
@@ -45,24 +46,29 @@ func (d *Discord) GetName() (name string) {
 	return user.Username
 }
 
+// GetGuilds gets a list of guilds
 func (d *Discord) GetGuilds() (guilds []*discordgo.UserGuild, err error) {
 	if d.instance == nil {
 		err = d.Connect(d.lastUsername, d.lastPassword)
 		if err != nil {
+			err = errors.Wrap(err, "getguilds: failed to connect")
 			return
 		}
 	}
 
 	guilds, err = d.instance.UserGuilds(0, "", "")
 	if err != nil {
+		err = errors.Wrap(err, "failed to user guilds")
 		return
 	}
 	return
 }
 
+// GetSession returns a session object
 func (d *Discord) GetSession() (session *discordgo.Session, err error) {
 	if d.instance == nil {
 		if err = d.Connect(d.lastUsername, d.lastPassword); err != nil {
+			err = errors.Wrap(err, "GetSession.Connect")
 			return
 		}
 	}
@@ -70,25 +76,30 @@ func (d *Discord) GetSession() (session *discordgo.Session, err error) {
 	return
 }
 
+// GetChannels returns a channel
 func (d *Discord) GetChannels(guildID string) (channels []*discordgo.Channel, err error) {
 	if d.instance == nil {
 		err = d.Connect(d.lastUsername, d.lastPassword)
 		if err != nil {
+			err = errors.Wrap(err, "GetChannels.Connect")
 			return
 		}
 	}
 
 	channels, err = d.instance.GuildChannels(guildID)
 	if err != nil {
+		err = errors.Wrap(err, "GetChannels.guildchannels")
 		return
 	}
 	return
 }
 
+// SendMessage sends a message through discord
 func (d *Discord) SendMessage(channelID string, message string) (msgReturn *discordgo.Message, err error) {
 	if d.instance == nil {
 		err = d.Connect(d.lastUsername, d.lastPassword)
 		if err != nil {
+			err = errors.Wrap(err, "Sendmessage.Connect")
 			return
 		}
 	}

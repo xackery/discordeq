@@ -13,6 +13,7 @@ import (
 
 var disco *discord.Discord
 
+// ListenToDiscord listens for discord messages
 func ListenToDiscord(config *eqemuconfig.Config, disc *discord.Discord) (err error) {
 	var session *discordgo.Session
 	disco = disc
@@ -148,6 +149,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 func sanitize(data string) (sData string) {
 	sData = data
 	sData = strings.Replace(sData, `%`, "&PCT;", -1)
+	for emoji, ascii := range emojis {
+		sData = strings.Replace(sData, emoji, ascii, -1)
+	}
 	re := regexp.MustCompile("[^\x00-\x7F]+")
 	sData = re.ReplaceAllString(sData, "")
 	return

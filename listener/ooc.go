@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/eqemuconfig"
 	"github.com/ziutek/telnet"
@@ -14,40 +15,31 @@ import (
 
 var newTelnet bool
 
-var lastId int
 var channelID string
 
-type UserMessage struct {
-	Id         int       `db:"id"`
-	From       string    `db:"from"`
-	To         string    `db:"to"`
-	Message    string    `db:"message"`
-	Type       int       `db:"type"`
-	CreateDate time.Time `db:"timerecorded"`
-}
-
-var userMessages []UserMessage
 var config *eqemuconfig.Config
 
 var t *telnet.Conn
 
+// GetTelnet returns the telnet connection
 func GetTelnet() (conn *telnet.Conn) {
 	conn = t
 	return
 }
 
+// ListenToOOC listens to telnet for OOC messages
 func ListenToOOC(eqconfig *eqemuconfig.Config, disco *discord.Discord) {
 	var err error
 	config = eqconfig
 	channelID = config.Discord.ChannelID
 
 	if err = connectTelnet(config); err != nil {
-		log.Println("[OOC] Warning while getting telnet connection:", err.Error())
+		log.Println("[OOC] connectTelnet:", err.Error())
 		return
 	}
 
 	if err = checkForMessages(config, t, disco); err != nil {
-		log.Println("[OOC] Warning while checking for messages:", err.Error())
+		log.Println("[OOC] checkForMessages:", err.Error())
 	}
 	t.Close()
 	t = nil
@@ -70,6 +62,7 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	log.Printf("[OOC] Connecting to %s:%s...\n", ip, port)
 
 	if t, err = telnet.Dial("tcp", fmt.Sprintf("%s:%s", ip, port)); err != nil {
+		err = errors.Wrap(err, "telnet dial")
 		return
 	}
 	t.SetReadDeadline(time.Now().Add(10 * time.Second))
@@ -77,6 +70,7 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	index := 0
 	skipAuth := false
 	if index, err = t.SkipUntilIndex("Username:", "Connection established from localhost, assuming admin"); err != nil {
+		err = errors.Wrap(err, "telnet username/skip wait")
 		return
 	}
 	if index != 0 {
@@ -87,22 +81,27 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 
 	if !skipAuth {
 		if err = Sendln(config.Discord.TelnetUsername); err != nil {
+			err = errors.Wrap(err, "telnet username send")
 			return
 		}
 
 		if err = t.SkipUntil("Password:"); err != nil {
+			err = errors.Wrap(err, "telnet password wait")
 			return
 		}
 		if err = Sendln(config.Discord.TelnetPassword); err != nil {
+			err = errors.Wrap(err, "telnet password send")
 			return
 		}
 	}
 
 	if err = Sendln("echo off"); err != nil {
+		err = errors.Wrap(err, "echo off send")
 		return
 	}
 
 	if err = Sendln("acceptmessages on"); err != nil {
+		err = errors.Wrap(err, "acceptmessages on send")
 		return
 	}
 
@@ -112,6 +111,7 @@ func connectTelnet(config *eqemuconfig.Config) (err error) {
 	return
 }
 
+// Sendln sends a message to telnet
 func Sendln(s string) (err error) {
 
 	buf := make([]byte, len(s)+1)
@@ -120,6 +120,7 @@ func Sendln(s string) (err error) {
 	if t == nil {
 		for {
 			if err = connectTelnet(config); err != nil {
+				err = errors.Wrap(err, "telnet telnetusername send")
 				return
 			}
 			fmt.Println("Telnet not connected, reconnecting...")
@@ -127,6 +128,10 @@ func Sendln(s string) (err error) {
 		}
 	}
 	_, err = t.Write(buf)
+	if err != nil {
+		err = errors.Wrap(err, "failed to write")
+		return
+	}
 	return
 }
 

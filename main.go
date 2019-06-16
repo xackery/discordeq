@@ -7,75 +7,72 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/xackery/discordeq/applog"
 	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/discordeq/listener"
 	"github.com/xackery/eqemuconfig"
 )
 
+// Version will be set during build
+var Version = "0.52.0"
+
 func main() {
 	applog.StartupInteractive()
 	log.SetOutput(applog.DefaultOutput)
-	startService()
+	err := run()
+	if err != nil {
+		var option string
+		applog.Error.Println(err)
+		fmt.Println("press a key then enter to exit.")
+		fmt.Scan(&option)
+		os.Exit(1)
+	}
+	os.Exit(0)
 }
 
-func startService() {
-	log.Println("Starting DiscordEQ v0.51")
-	var option string
+func run() (err error) {
+	log.Println("Starting DiscordEQ", Version)
+
 	//Load config
 	config, err := eqemuconfig.GetConfig()
 	if err != nil {
-		applog.Error.Println("Error while loading eqemu_config to start:", err.Error())
-		fmt.Println("press a key then enter to exit.")
-
-		fmt.Scan(&option)
-		os.Exit(1)
+		err = errors.Wrap(err, "error while loading eqemu_config to start")
+		return
 	}
 	if config.Discord.RefreshRate == 0 {
 		config.Discord.RefreshRate = 10
 	}
 
 	if !isNewTelnetConfig(config) {
-		log.Println("Telnet must be enabled for this tool to work. Check your eqemu_config, and please adjust.")
-		fmt.Println("press a key then enter to exit.")
-		fmt.Scan(&option)
-		os.Exit(1)
+		err = fmt.Errorf("telnet must be enabled for this tool to work. Check your eqemu_config, and please adjust")
+		return
 	}
 
 	if config.Discord.Username == "" {
-		applog.Error.Println("I don't see a username set in your discord > username section of eqemu_config, please adjust.")
-		fmt.Println("press a key then enter to exit.")
-		fmt.Scan(&option)
-		os.Exit(1)
+		err = fmt.Errorf("username not set in your discord > username section of eqemu_config, please adjust")
+		return
 	}
 
 	if config.Discord.Password == "" && config.Discord.ClientID == "" {
-		applog.Error.Println("I don't see a password set in your discord > password section of eqemu_config, as well as no client id, please adjust.")
-		fmt.Println("press a key then enter to exit.")
-		fmt.Scan(&option)
-		os.Exit(1)
+		err = fmt.Errorf("password not set in your discord > password section of eqemu_config, as well as no client id, please adjust")
+		return
 	}
 
 	if config.Discord.ServerID == "" {
-		applog.Error.Println("I don't see a serverid set in your discord > serverid section of eqemuconfig, please adjust.")
-		fmt.Println("press a key then enter to exit.")
-		fmt.Scan(&option)
-		os.Exit(1)
+		err = fmt.Errorf("serverid not set in your discord > serverid section of eqemuconfig, please adjust")
+		return
 	}
 
 	if config.Discord.ChannelID == "" {
-		applog.Error.Println("I don't see a channelid set in your  discord > channelid section of eqemuconfig.xml, please adjust.")
-		fmt.Println("press a key then enter to exit.")
-		fmt.Scan(&option)
-		os.Exit(1)
+		err = fmt.Errorf("channelid not set in your  discord > channelid section of eqemuconfig.xml, please adjust")
+		return
 	}
 	disco := discord.Discord{}
 	err = disco.Connect(config.Discord.Username, config.Discord.Password)
 	if err != nil {
-		applog.Error.Println("Error connecting to discord:", err.Error())
-		fmt.Println("press a key then enter to exit.")
-		fmt.Scan(&option)
-		os.Exit(1)
+		err = errors.Wrap(err, "discord")
+		return
 	}
 	go listenToDiscord(config, &disco)
 	go listenToOOC(config, &disco)
