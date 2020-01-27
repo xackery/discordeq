@@ -19,7 +19,6 @@ A break down of the steps you will need to follow:
 			"itemurl" : "",
 			"refreshrate" : "15",
 			"clientid": "22222",
-			"clientsecret": "33333",
 			"serverid" : "44444",
 			"username" : "55555abc"
 		},
