@@ -1,6 +1,8 @@
 package listener
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"fmt"
 	"log"
 	"regexp"
@@ -10,6 +12,11 @@ import (
 	"github.com/xackery/discordeq/discord"
 	"github.com/xackery/eqemuconfig"
 )
+
+type NameConfig struct {
+	Discord string
+	Name string
+}
 
 var disco *discord.Discord
 
@@ -90,60 +97,67 @@ func commandParse(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-
-	ign := ""
-	member, err := s.GuildMember(config.Discord.ServerID, m.Author.ID)
+	members, err := s.GuildMembers(config.Discord.ServerID, "0", 1000)
 	if err != nil {
 		log.Printf("[Discord] Failed to get member: %s (Make sure you have set the bot permissions to see members)", err.Error())
 		return
 	}
 
-	roles, err := s.GuildRoles(config.Discord.ServerID)
+	name_config_file, err := ioutil.ReadFile("discord_names.json")
 	if err != nil {
-		log.Printf("[Discord] Failed to get roles: %s (Make sure you have set the bot permissions to see roles)", err.Error())
+		log.Printf("Failed to open name config: %s", err.Error());
 		return
 	}
-	for _, role := range member.Roles {
-		if ign != "" {
+	
+	var names []NameConfig
+
+	nameJson := json.Unmarshal(name_config_file, &names)
+	if nameJson != nil {
+		log.Printf("Failed to unmarshal name config: %s", nameJson.Error());
+		return
+	}
+	discord_id := ""
+	ingame_nickname := ""
+	for _, member := range members {
+		if ingame_nickname != "" {
 			break
 		}
-		for _, gRole := range roles {
-			if ign != "" {
+
+		for name_index := range names {
+			if ingame_nickname != "" {
 				break
 			}
-			if strings.TrimSpace(gRole.ID) == strings.TrimSpace(role) {
-				if strings.Contains(gRole.Name, "IGN:") {
-					splitStr := strings.Split(gRole.Name, "IGN:")
-					if len(splitStr) > 1 {
-						ign = strings.TrimSpace(splitStr[1])
-					}
-				}
+
+			discord_id = names[name_index].Discord
+			if member.User.ID == discord_id {
+				ingame_nickname = strings.TrimSpace(names[name_index].Name)
 			}
 		}
 	}
-	if ign == "" {
+
+	if ingame_nickname == "" {
 		return
 	}
-	msg := m.ContentWithMentionsReplaced()
+	message := m.ContentWithMentionsReplaced()
 	//Maximum limit of 4k
-	if len(msg) > 4000 {
-		msg = msg[0:4000]
+	if len(message) > 4000 {
+		message = message[0:4000]
 	}
 
-	if len(msg) < 1 {
+	if len(message) < 1 {
 		return
 	}
 
-	ign = sanitize(ign)
-	msg = sanitize(msg)
+	ingame_nickname = sanitize(ingame_nickname)
+	message = sanitize(message)
 
 	//Send message.
-	if err = Sendln(fmt.Sprintf("emote world 260 %s says from discord, '%s'", ign, msg)); err != nil {
-		log.Printf("[Discord] Error sending message to telnet (%s:%s): %s\n", ign, msg, err.Error())
+	if err = Sendln(fmt.Sprintf("emote world 260 %s says from Discord, '%s'", ingame_nickname, message)); err != nil {
+		log.Printf("[Discord] Error sending message to telnet (%s:%s): %s\n", ingame_nickname, message, err.Error())
 		return
 	}
 
-	log.Printf("[Discord] %s: %s\n", ign, msg)
+	log.Printf("[Discord] %s: %s\n", ingame_nickname, message)
 }
 
 func sanitize(data string) (sData string) {

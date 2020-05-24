@@ -175,7 +175,7 @@ func checkForMessages(config *eqemuconfig.Config, t *telnet.Conn, disco *discord
 
 		message = convertLinks(config.Discord.ItemUrl, message)
 
-		if _, err = disco.SendMessage(channelID, fmt.Sprintf("**%s OOC**: %s", sender, message)); err != nil {
+		if _, err = disco.SendMessage(channelID, fmt.Sprintf("**%s:** %s", sender, message)); err != nil {
 			errStr := err.Error()
 			if strings.Contains(err.Error(), "Unauthorized") {
 				errStr = fmt.Sprintf("%s (try visiting: https://discordapp.com/oauth2/authorize?&client_id=%s&scope=bot&permissions=2146958591 to give access)", err.Error(), config.Discord.ClientID)
