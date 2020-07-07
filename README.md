@@ -1,5 +1,5 @@
 # DiscordEQ
-This plugin allows Everquest to communicate with Discord in a bidirectional manner.
+This plugin allows Everquest to communicate with Discord in a bidirectional manner. Check out (TalkEQ)[https://github.com/xackery/talkeq] for an alternative project with additional features, planned to replace discordEQ
 
 
 ## For newbies to github
